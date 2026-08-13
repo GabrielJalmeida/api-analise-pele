@@ -6,12 +6,16 @@ from io import BytesIO
 from PIL import Image, UnidentifiedImageError
 import sqlite3
 
+from routers.geral import router as router_geral
+
 from services import produto_para_dict, buscar_produtos_compativeis, gerar_recomendacoes, obter_mensagem_inadequacao
 from models import PerfilPele, NovoProduto, AtualizarProduto, TextoAnalisePele
 from database import conectar_banco
 from ai_service import interpretar_perfil, interpretar_foto, LimiteIAExcedido, ServicoIAIndisponivel, RespostaIAInvalida, ConfiguracaoIAInvalida
 
 app = FastAPI()
+
+app.include_router(router_geral)
 
 MIME_POR_FORMATO = {
     "JPEG": "image/jpeg",
@@ -93,20 +97,6 @@ async def tratar_configuracao_ia_invalida(
         }
     )
 
-#=========================================
-# GERAL                                  #
-#=========================================
-
-@app.get("/", tags=["Geral"])
-def esta_funcionando():
-    return {"message": "A API está funcionando!"}
-
-status = "Em desenvolvimento"
-projeto = "Análise de Pele para Loja de cosméticos"
-
-@app.get("/status", tags=["Geral"])
-def obter_status():
-    return {"status": status, "projeto": projeto}
 
 #=========================================
 # ANÁLISE DE PELE                        #
@@ -148,8 +138,6 @@ async def analisar_foto(arquivo: UploadFile):
             detail="Formato de imagem não permitido. Envie uma imagem JPG, PNG ou WEBP."
         )
 
-    # Lê apenas o necessário para detectar excesso de tamanho, em vez de
-    # carregar um arquivo arbitrariamente grande inteiro na memória.
     conteudo = await arquivo.read(TAMANHO_MAXIMO_IMAGEM + 1)
 
     if len(conteudo) > TAMANHO_MAXIMO_IMAGEM:

@@ -154,3 +154,11 @@ def test_upload_rejeita_imagem_acima_de_vinte_megapixels(client):
     )
 
     assert resposta.status_code == 413
+
+def test_rota_raiz_confirma_funcionamento(client):
+    resposta = client.get("/")
+
+    assert resposta.status_code == 200
+    assert resposta.json() == {
+        "message": "A API está funcionando!"
+    }
