@@ -1,23 +1,10 @@
-# Ambiente virtual
+.env
 .venv/
-venv/
-
-# Cache do Python
 __pycache__/
 *.py[cod]
+.pytest_cache/
 
-# Variáveis e chaves secretas
-.env
-.env.*
-
-# Bancos locais
+# Bancos locais e arquivos gerados durante o desenvolvimento
 *.db
 *.sqlite
 *.sqlite3
-
-# VS Code
-.vscode/
-
-# Sistema operacional
-.DS_Store
-Thumbs.db

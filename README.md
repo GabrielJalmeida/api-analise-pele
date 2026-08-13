@@ -1,223 +1,150 @@
 # API de Análise de Pele
 
-API backend desenvolvida em Python com FastAPI para análise de perfil de pele e recomendação de produtos cosméticos.
+Backend em Python com FastAPI para interpretar informações cosméticas da pele e recomendar produtos de um catálogo.
 
-O projeto está em desenvolvimento e faz parte de uma aplicação voltada para e-commerce de cosméticos.
+O sistema oferece caminhos independentes de entrada:
 
-## Funcionalidades atuais
+- foto, por `POST /analise-foto`;
+- descrição em texto, por `POST /analise-texto`;
+- perfil já conhecido, por `POST /recomendacoes`.
 
-- Cadastro de produtos
-- Listagem de produtos
-- Busca de produto por ID
-- Atualização parcial de produtos
-- Validação dos dados recebidos pela API
-- Controle de estoque e produtos ativos
-- Classificação de produtos por tipo de pele
-- Recomendação personalizada com sistema de pontuação
-- Organização das recomendações por categoria
-- Entrada de texto preparada para futura análise de perfil de pele
+Nenhum desses caminhos depende dos demais. O frontend decide qual opção apresentar primeiro, se deseja destacar a foto e quais campos serão exigidos na própria experiência. A API apenas valida os dados da rota que foi chamada.
 
-## Tecnologias utilizadas
+> A análise é informativa e cosmética. Ela não realiza diagnóstico médico e não substitui avaliação dermatológica.
 
-- Python
-- FastAPI
-- Pydantic
-- SQLite
-- Uvicorn
+## Funcionalidades
 
-## Estrutura do projeto
+- análise de foto com Gemini e resposta estruturada;
+- análise de descrição textual com Gemini e resposta estruturada;
+- rejeição de imagens inválidas, excessivamente grandes ou inadequadas para análise;
+- cadastro, consulta, listagem e atualização de produtos;
+- filtro por estoque, status ativo e compatibilidade com o tipo de pele;
+- pontuação e agrupamento de recomendações por categoria;
+- validações estritas com Pydantic;
+- testes automatizados com banco SQLite temporário e IA simulada.
 
-```text
-api-analise-pele/
-│
-├── main.py
-├── models.py
-├── services.py
-├── database.py
-├── criar_banco.py
-├── requirements.txt
-├── README.md
-└── .gitignore
-```
+## Tecnologias
 
-### main.py
+- Python 3.10 ou superior;
+- FastAPI e Uvicorn;
+- Pydantic;
+- SQLite;
+- Google Gen AI SDK;
+- Pillow;
+- Pytest para os testes.
 
-Contém os endpoints da API e coordena as requisições recebidas.
+## Configuração local
 
-### models.py
-
-Define os modelos e validações utilizando Pydantic.
-
-### services.py
-
-Contém as regras de negócio, incluindo filtros, cálculo de compatibilidade e geração das recomendações.
-
-### database.py
-
-Responsável pela conexão com o banco de dados SQLite.
-
-### criar_banco.py
-
-Responsável pela criação da estrutura inicial do banco de dados.
-
-## Como executar o projeto
-
-Clone o repositório:
-
-```bash
-git clone https://github.com/GabrielJalmeida/api-analise-pele.git
-```
-
-Entre na pasta do projeto:
-
-```bash
-cd api-analise-pele
-```
-
-Crie um ambiente virtual:
+Entre na pasta do projeto e crie um ambiente virtual:
 
 ```bash
 python -m venv .venv
 ```
 
-Ative o ambiente virtual no Windows:
+No Windows, ative-o com:
 
-```bash
+```powershell
 .venv\Scripts\activate
 ```
 
-Instale as dependências:
+No Linux ou macOS:
+
+```bash
+source .venv/bin/activate
+```
+
+Instale as dependências da aplicação:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Crie o banco de dados:
+Crie o arquivo local de configuração a partir do exemplo:
+
+```powershell
+copy .env.example .env
+```
+
+No arquivo `.env`, informe a chave apenas no servidor:
+
+```dotenv
+GEMINI_API_KEY=sua_chave_aqui
+GEMINI_MODEL=gemini-3.5-flash-lite
+```
+
+`gemini-3.5-flash-lite` é o modelo padrão do projeto. A variável `GEMINI_MODEL` permite substituí-lo sem editar o código.
+
+A API inicia mesmo sem `GEMINI_API_KEY`. Nesse caso, catálogo, CRUD, perfil direto e recomendações continuam disponíveis; somente as rotas que realmente usam IA respondem com status HTTP 503. Nunca envie a chave para o frontend nem a adicione ao Git.
+
+Crie a estrutura do banco local:
 
 ```bash
 python criar_banco.py
 ```
 
-Inicie a API:
+Inicie o servidor:
 
 ```bash
 uvicorn main:app --reload
 ```
 
-A documentação interativa da API estará disponível em:
+Documentação interativa:
 
 ```text
 http://127.0.0.1:8000/docs
 ```
 
-## Sistema de recomendação
+## Rotas principais
 
-O sistema considera características do perfil de pele e dos produtos disponíveis.
+- `POST /analise-foto`: recebe uma imagem JPG, PNG ou WEBP de até 5 MB e 20 megapixels;
+- `POST /analise-texto`: recebe uma descrição com ao menos 10 caracteres úteis e até 1000 caracteres no total;
+- `POST /perfil-pele`: valida e devolve um perfil informado diretamente;
+- `POST /recomendacoes`: recomenda produtos a partir de um perfil já conhecido;
+- `GET /recomendacoes/{tipo_pele}`: lista itens compatíveis com o tipo informado;
+- `GET /produtos` e `GET /produto/{id}`: consultam o catálogo;
+- `POST /produto` e `PATCH /produto/{id}`: cadastram e atualizam itens.
 
-Antes de participar das recomendações, o produto precisa:
+## Regras de recomendação atuais
 
-- Estar ativo
-- Possuir estoque maior que zero
-- Ser compatível com o tipo de pele informado ou ser indicado para todos os tipos de pele
+Antes de participar das recomendações, o produto precisa estar ativo, possuir estoque maior que zero e ser compatível com o tipo de pele informado ou marcado para todos os tipos.
 
-A compatibilidade utiliza um sistema de pontuação:
+A ordenação usa a seguinte pontuação:
 
-- Tipo de pele correspondente: +3 pontos
-- Produto indicado para todos os tipos de pele: +1 ponto
-- Compatibilidade com pele sensível: +2 pontos
-- Indicação para espinhas: +2 pontos
+- tipo de pele correspondente: +3;
+- produto para todos os tipos: +1;
+- compatibilidade com pele sensível: +2;
+- indicação para espinhas: +2.
 
-Os produtos são ordenados pela pontuação e agrupados por categoria.
+Os produtos são ordenados pela pontuação e agrupados por categoria. Nesta versão, sensibilidade e indicação para espinhas aumentam a pontuação; elas não excluem produtos. Essa semântica deve ser alterada apenas após decisão de negócio.
 
-## Perfil de pele
+## Testes
 
-Atualmente, o perfil utilizado pelo sistema possui três características:
-
-```json
-{
-  "tipo_pele": "oleosa",
-  "sensivel": true,
-  "tem_espinha": true
-}
-```
-
-Os tipos de pele aceitos são:
-
-- oleosa
-- seca
-- mista
-- normal
-
-Esse perfil é utilizado pelo motor de recomendação para selecionar e classificar os produtos.
-
-## Categorias de produtos
-
-Atualmente, a API aceita as seguintes categorias:
-
-- limpeza
-- hidratante
-- serum
-- protetor_solar
-- outros
-
-## Banco de dados
-
-O projeto utiliza SQLite.
-
-O arquivo do banco de dados não é enviado ao GitHub.
-
-Para criar um novo banco com a estrutura necessária, execute:
+Instale as dependências de desenvolvimento e execute a suíte:
 
 ```bash
-python criar_banco.py
+pip install -r requirements-dev.txt
+pytest -q
 ```
 
-O banco será criado automaticamente no diretório do projeto.
+Os testes usam banco temporário e respostas simuladas da IA, portanto não consomem chave nem quota do Gemini.
 
-## Validações
-
-A API possui validações para evitar dados inválidos, incluindo:
-
-- Nome de produto vazio
-- Nome de produto muito curto ou muito longo
-- Preço menor ou igual a zero
-- Estoque negativo
-- Tipos de pele inválidos
-- Categorias inválidas
-- Texto de análise muito curto
-- Texto de análise com mais de 1000 caracteres
-- Produtos duplicados
-
-## Documentação da API
-
-O FastAPI gera automaticamente uma interface Swagger para testes e documentação dos endpoints.
-
-Após iniciar o servidor, acesse:
+## Estrutura
 
 ```text
-http://127.0.0.1:8000/docs
+api-analise-pele/
+├── ai_service.py
+├── criar_banco.py
+├── database.py
+├── main.py
+├── models.py
+├── services.py
+├── tests/
+├── .env.example
+├── requirements.txt
+├── requirements-dev.txt
+└── README.md
 ```
 
-Os endpoints estão organizados por categorias para facilitar a navegação:
+## Limites desta etapa
 
-- Geral
-- Análise de Pele
-- Produtos
-- Recomendações
-
-## Status do projeto
-
-🚧 Projeto em desenvolvimento.
-
-A versão atual contém:
-
-- Estrutura da API
-- Banco de dados
-- CRUD de produtos
-- Validações
-- Motor de recomendação
-- Sistema de pontuação
-- Organização das recomendações por categoria
-- Entrada de texto preparada para futuras análises
-
-Novas funcionalidades serão adicionadas conforme o desenvolvimento do projeto.
+Esta é uma versão de desenvolvimento para o TCC. Antes de produção, ainda será necessário proteger as rotas administrativas, definir CORS, usar armazenamento persistente adequado ao ambiente de hospedagem, aplicar política de privacidade para fotos e adicionar observabilidade. Essas melhorias fazem parte das próximas etapas do plano do projeto.

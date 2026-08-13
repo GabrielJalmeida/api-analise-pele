@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, UploadFile, Request
 from fastapi.responses import JSONResponse
+from starlette.concurrency import run_in_threadpool
 from typing import Literal
 from io import BytesIO
 from PIL import Image, UnidentifiedImageError
@@ -31,6 +32,7 @@ TIPOS_IMAGEM_PERMITIDOS = {
 }
 
 TAMANHO_MAXIMO_IMAGEM = 5 * 1024 * 1024
+TOTAL_MAXIMO_PIXELS = 20_000_000
 
 # ========================================
 # TRATAMENTO GLOBAL DE ERROS             #
@@ -146,7 +148,9 @@ async def analisar_foto(arquivo: UploadFile):
             detail="Formato de imagem não permitido. Envie uma imagem JPG, PNG ou WEBP."
         )
 
-    conteudo = await arquivo.read()
+    # Lê apenas o necessário para detectar excesso de tamanho, em vez de
+    # carregar um arquivo arbitrariamente grande inteiro na memória.
+    conteudo = await arquivo.read(TAMANHO_MAXIMO_IMAGEM + 1)
 
     if len(conteudo) > TAMANHO_MAXIMO_IMAGEM:
         raise HTTPException(
@@ -157,7 +161,24 @@ async def analisar_foto(arquivo: UploadFile):
     try:
         with Image.open(BytesIO(conteudo)) as imagem:
             formato_real = imagem.format
+            largura, altura = imagem.size
+
+            if largura * altura > TOTAL_MAXIMO_PIXELS:
+                raise HTTPException(
+                    status_code=413,
+                    detail="A imagem não pode ultrapassar 20 megapixels."
+                )
+
             imagem.verify()
+
+    except HTTPException:
+        raise
+
+    except Image.DecompressionBombError:
+        raise HTTPException(
+            status_code=413,
+            detail="As dimensões da imagem são grandes demais."
+        )
 
     except (UnidentifiedImageError, OSError):
         raise HTTPException(
@@ -173,9 +194,10 @@ async def analisar_foto(arquivo: UploadFile):
 
     mime_type_real = MIME_POR_FORMATO[formato_real]
 
-    resultado = interpretar_foto(
+    resultado = await run_in_threadpool(
+        interpretar_foto,
         conteudo,
-        mime_type_real
+        mime_type_real,
     )
 
     if not resultado.imagem_adequada:

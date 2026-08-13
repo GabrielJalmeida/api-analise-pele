@@ -1,21 +1,19 @@
 import os
 import base64
+from functools import lru_cache
+
 from pydantic import ValidationError
 from dotenv import load_dotenv
 from google import genai
 from google.genai import errors
+
 from models import ResultadoAnaliseIA, ResultadoAnaliseFoto
 
 load_dotenv()
 
-api_key = os.getenv("GEMINI_API_KEY")
-
+# Modelo padrão informado para o projeto. Ele pode ser alterado por ambiente
+# sem exigir mudanças no código-fonte.
 MODELO_GEMINI = "gemini-3.5-flash-lite"
-
-if not api_key:
-    raise RuntimeError("A chave GEMINI_API_KEY não foi encontrada")
-
-client = genai.Client(api_key=api_key)
 
 class LimiteIAExcedido(Exception):
     pass
@@ -28,6 +26,28 @@ class RespostaIAInvalida(Exception):
 
 class ConfiguracaoIAInvalida(Exception):
     pass
+
+
+def obter_modelo_gemini():
+    modelo_configurado = os.getenv("GEMINI_MODEL", MODELO_GEMINI).strip()
+    return modelo_configurado or MODELO_GEMINI
+
+
+@lru_cache(maxsize=4)
+def _criar_cliente(api_key):
+    return genai.Client(api_key=api_key)
+
+
+def obter_cliente():
+    """Cria o cliente somente quando uma análise por IA é solicitada."""
+    api_key = os.getenv("GEMINI_API_KEY", "").strip()
+
+    if not api_key:
+        raise ConfiguracaoIAInvalida(
+            "A variável de ambiente GEMINI_API_KEY não foi configurada"
+        )
+
+    return _criar_cliente(api_key)
 
 def interpretar_perfil(texto):
     prompt = f"""
@@ -51,9 +71,11 @@ Descrição do usuário:
 {texto}
 """
 
+    client = obter_cliente()
+
     try:
         interaction = client.interactions.create(
-            model=MODELO_GEMINI,
+            model=obter_modelo_gemini(),
             input=prompt,
             store=False,
             response_format={
@@ -64,7 +86,7 @@ Descrição do usuário:
         )
 
     except errors.ClientError as erro:
-        if erro.code == 429:
+        if getattr(erro, "code", None) == 429:
             raise LimiteIAExcedido from erro
 
         raise ConfiguracaoIAInvalida from erro
@@ -154,9 +176,11 @@ Regras importantes:
 - Se houver uma alteração visual mas não for possível determinar com segurança se é uma espinha, use null.
 """
 
+    client = obter_cliente()
+
     try:
         interaction = client.interactions.create(
-            model=MODELO_GEMINI,
+            model=obter_modelo_gemini(),
             store=False,
             input=[
                 {
@@ -176,7 +200,7 @@ Regras importantes:
             }
         )
     except errors.ClientError as erro:
-        if erro.code == 429:
+        if getattr(erro, "code", None) == 429:
             raise LimiteIAExcedido from erro
 
         raise ConfiguracaoIAInvalida from erro

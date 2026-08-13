@@ -1,7 +1,14 @@
-from pydantic import BaseModel, field_validator
+import math
+
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 from typing import Literal
 
-class TextoAnalisePele(BaseModel):
+
+class ModeloEstrito(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+
+class TextoAnalisePele(ModeloEstrito):
     texto: str
 
     @field_validator("texto")
@@ -23,7 +30,7 @@ class TextoAnalisePele(BaseModel):
 
         return valor
 
-class ResultadoAnaliseFoto(BaseModel):
+class ResultadoAnaliseFoto(ModeloEstrito):
     imagem_adequada: bool
 
     tipo_pele: Literal["oleosa", "seca", "mista", "normal"] | None = None
@@ -49,17 +56,47 @@ class ResultadoAnaliseFoto(BaseModel):
         "outro"
     ] | None = None
 
-class ResultadoAnaliseIA(BaseModel):
+    @model_validator(mode="after")
+    def resultado_consistente(self):
+        caracteristicas = (
+            self.tipo_pele,
+            self.tem_espinha,
+            self.marcas_pos_acne,
+            self.vermelhidao,
+            self.descamacao,
+            self.brilho_excessivo,
+        )
+
+        if self.imagem_adequada:
+            if self.motivo_inadequacao is not None:
+                raise ValueError(
+                    "Uma imagem adequada não pode ter motivo de inadequação"
+                )
+        else:
+            if self.motivo_inadequacao is None:
+                raise ValueError(
+                    "Uma imagem inadequada deve informar o motivo"
+                )
+
+            if any(valor is not None for valor in caracteristicas):
+                raise ValueError(
+                    "Uma imagem inadequada não pode ter características de pele"
+                )
+
+        return self
+
+
+class ResultadoAnaliseIA(ModeloEstrito):
     tipo_pele: Literal["oleosa", "seca", "mista", "normal"] | None = None
     sensivel: bool | None = None
     tem_espinha: bool | None = None
 
-class PerfilPele(BaseModel):
+class PerfilPele(ModeloEstrito):
     tipo_pele: Literal["oleosa", "seca", "mista", "normal"]
     sensivel: bool | None = None
     tem_espinha: bool | None = None
 
-class NovoProduto(BaseModel):
+class NovoProduto(ModeloEstrito):
     nome: str
     preco: float
     estoque: int
@@ -84,8 +121,8 @@ class NovoProduto(BaseModel):
     @field_validator("preco")
     @classmethod
     def preco_valido(cls, valor):
-        if valor <= 0:
-            raise ValueError("O preço deve ser maior do que zero")
+        if not math.isfinite(valor) or valor <= 0:
+            raise ValueError("O preço deve ser um número finito maior do que zero")
         return valor
 
     @field_validator("estoque")
@@ -96,7 +133,7 @@ class NovoProduto(BaseModel):
         return valor
 
 
-class AtualizarProduto(BaseModel):
+class AtualizarProduto(ModeloEstrito):
     nome: str | None = None
     preco: float | None = None
     estoque: int | None = None
@@ -122,8 +159,8 @@ class AtualizarProduto(BaseModel):
     @field_validator("preco")
     @classmethod
     def preco_valido(cls, valor):
-        if valor is not None and valor <= 0:
-            raise ValueError("O preço deve ser maior do que zero")
+        if valor is not None and (not math.isfinite(valor) or valor <= 0):
+            raise ValueError("O preço deve ser um número finito maior do que zero")
         return valor
 
     @field_validator("estoque")
