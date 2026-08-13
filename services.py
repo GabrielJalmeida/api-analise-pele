@@ -1,5 +1,20 @@
 from database import conectar_banco
 
+def obter_mensagem_inadequacao(motivo):
+    mensagens = {
+        "sem_rosto_visivel": "Não foi possível identificar o rosto na imagem. Envie uma foto com o rosto bem visível.",
+        "rosto_distante": "O rosto está muito distante. Envie uma foto mais aproximada.",
+        "imagem_escura": "A imagem está muito escura. Tente tirar a foto em um local mais iluminado.",
+        "imagem_desfocada": "A imagem está desfocada. Tente novamente com mais nitidez.",
+        "pele_molhada": "A pele parece estar molhada. Seque o rosto e envie uma nova foto.",
+        "interferencia_visual": "Há uma interferência visual que dificulta a análise da pele. Envie uma foto natural, sem filtros, efeitos ou produtos visíveis.",
+        "iluminacao_irregular": "A iluminação dificulta a análise da pele. Envie uma nova foto com luz uniforme, evitando sombras fortes ou luz direta intensa."
+    }
+
+    return mensagens.get(
+        motivo,
+        "A imagem não está adequada para análise. Tente enviar outra foto."
+    )
 
 def produto_para_dict(produto):
     return {

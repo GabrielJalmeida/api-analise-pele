@@ -23,10 +23,41 @@ class TextoAnalisePele(BaseModel):
 
         return valor
 
+class ResultadoAnaliseFoto(BaseModel):
+    imagem_adequada: bool
+
+    tipo_pele: Literal["oleosa", "seca", "mista", "normal"] | None = None
+
+    tem_espinha: bool | None = None
+
+    marcas_pos_acne: bool | None = None
+
+    vermelhidao: bool | None = None
+
+    descamacao: bool | None = None
+
+    brilho_excessivo: bool | None = None
+
+    motivo_inadequacao: Literal[
+        "sem_rosto_visivel",
+        "rosto_distante",
+        "imagem_escura",
+        "imagem_desfocada",
+        "iluminacao_irregular",
+        "pele_molhada",
+        "interferencia_visual",
+        "outro"
+    ] | None = None
+
+class ResultadoAnaliseIA(BaseModel):
+    tipo_pele: Literal["oleosa", "seca", "mista", "normal"] | None = None
+    sensivel: bool | None = None
+    tem_espinha: bool | None = None
+
 class PerfilPele(BaseModel):
     tipo_pele: Literal["oleosa", "seca", "mista", "normal"]
-    sensivel: bool
-    tem_espinha: bool
+    sensivel: bool | None = None
+    tem_espinha: bool | None = None
 
 class NovoProduto(BaseModel):
     nome: str
