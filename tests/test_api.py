@@ -162,3 +162,195 @@ def test_rota_raiz_confirma_funcionamento(client):
     assert resposta.json() == {
         "message": "A API está funcionando!"
     }
+
+def test_analise_texto_retorna_informacoes_insuficientes(
+    client,
+    monkeypatch
+):
+    monkeypatch.setattr(
+        main,
+        "interpretar_perfil",
+        lambda texto: ResultadoAnaliseIA(
+            tipo_pele=None,
+            sensivel=None,
+            tem_espinha=None,
+        ),
+    )
+
+    resposta = client.post(
+        "/analise-texto",
+        json={
+            "texto": "Quero alguns produtos para cuidar melhor do meu rosto."
+        },
+    )
+
+    assert resposta.status_code == 200
+    assert resposta.json()["status"] == "informacoes_insuficientes"
+    assert resposta.json()["total_recomendacoes"] == 0
+    assert resposta.json()["recomendacoes"] == {}
+
+def test_analise_foto_retorna_imagem_inadequada(
+    client,
+    monkeypatch
+):
+    monkeypatch.setattr(
+        main,
+        "interpretar_foto",
+        lambda conteudo, mime_type: ResultadoAnaliseFoto(
+            imagem_adequada=False,
+            motivo_inadequacao="pele_molhada",
+        ),
+    )
+
+    resposta = client.post(
+        "/analise-foto",
+        files={
+            "arquivo": (
+                "pele.jpg",
+                criar_imagem_jpeg(),
+                "image/jpeg",
+            )
+        },
+    )
+
+    assert resposta.status_code == 200
+    assert resposta.json()["status"] == "imagem_inadequada"
+    assert resposta.json()["analise"]["imagem_adequada"] is False
+    assert resposta.json()["analise"]["motivo_inadequacao"] == "pele_molhada"
+
+def test_analise_foto_retorna_informacoes_insuficientes(
+    client,
+    monkeypatch
+):
+    monkeypatch.setattr(
+        main,
+        "interpretar_foto",
+        lambda conteudo, mime_type: ResultadoAnaliseFoto(
+            imagem_adequada=True,
+            tipo_pele=None,
+            tem_espinha=None,
+        ),
+    )
+
+    resposta = client.post(
+        "/analise-foto",
+        files={
+            "arquivo": (
+                "pele.jpg",
+                criar_imagem_jpeg(),
+                "image/jpeg",
+            )
+        },
+    )
+
+    assert resposta.status_code == 200
+    assert resposta.json()["status"] == "informacoes_insuficientes"
+    assert resposta.json()["total_recomendacoes"] == 0
+    assert resposta.json()["recomendacoes"] == {}
+
+def test_listagem_de_produtos_aceita_filtros(client, produto_valido):
+    client.post("/produto", json=produto_valido)
+
+    hidratante = {
+        **produto_valido,
+        "nome": "Hidratante universal teste",
+        "categoria": "hidratante",
+        "tipo_pele": "todos",
+    }
+
+    inativo = {
+        **produto_valido,
+        "nome": "Serum inativo teste",
+        "categoria": "serum",
+        "tipo_pele": "seca",
+        "ativo": False,
+    }
+
+    client.post("/produto", json=hidratante)
+    client.post("/produto", json=inativo)
+
+    por_categoria = client.get(
+        "/produtos",
+        params={"categoria": "limpeza"},
+    )
+
+    por_tipo = client.get(
+        "/produtos",
+        params={"tipo_pele": "todos"},
+    )
+
+    por_status = client.get(
+        "/produtos",
+        params={"ativo": False},
+    )
+
+    por_busca = client.get(
+        "/produtos",
+        params={"busca": "Gel"},
+    )
+
+    assert por_categoria.status_code == 200
+    assert len(por_categoria.json()) == 1
+    assert por_categoria.json()[0]["categoria"] == "limpeza"
+
+    assert len(por_tipo.json()) == 1
+    assert por_tipo.json()[0]["tipo_pele"] == "todos"
+
+    assert len(por_status.json()) == 1
+    assert por_status.json()[0]["ativo"] is False
+
+    assert len(por_busca.json()) == 1
+    assert por_busca.json()[0]["nome"] == produto_valido["nome"]
+
+def test_desativacao_de_produto_preserva_registro_e_remove_das_recomendacoes(
+    client,
+    produto_valido,
+):
+    criacao = client.post("/produto", json=produto_valido)
+    id_produto = criacao.json()["id"]
+
+    desativacao = client.delete(f"/produto/{id_produto}")
+
+    consulta = client.get(f"/produto/{id_produto}")
+
+    recomendacoes = client.post(
+        "/recomendacoes",
+        json={
+            "tipo_pele": "oleosa",
+            "sensivel": True,
+            "tem_espinha": True,
+        },
+    )
+
+    segunda_desativacao = client.delete(f"/produto/{id_produto}")
+
+    assert desativacao.status_code == 200
+    assert desativacao.json()["status"] == "produto_desativado"
+
+    assert consulta.status_code == 200
+    assert consulta.json()["ativo"] is False
+
+    assert recomendacoes.status_code == 200
+    assert recomendacoes.json()["total_recomendacoes"] == 0
+
+    assert segunda_desativacao.status_code == 409
+
+def test_erro_de_validacao_tem_formato_padronizado(client):
+    resposta = client.post(
+        "/recomendacoes",
+        json={
+            "tipo_pele": "tipo_inexistente",
+            "sensivel": True,
+            "tem_espinha": False,
+        },
+    )
+
+    assert resposta.status_code == 422
+
+    dados = resposta.json()
+
+    assert dados["status"] == "dados_invalidos"
+    assert dados["mensagem"] == "Os dados enviados são inválidos."
+    assert dados["erros"][0]["campo"] == "tipo_pele"
+    assert dados["erros"][0]["mensagem"] == "Valor inválido."
+

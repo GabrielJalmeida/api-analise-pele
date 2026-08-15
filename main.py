@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, UploadFile, Request
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 from starlette.concurrency import run_in_threadpool
 from typing import Literal
 from io import BytesIO
@@ -8,9 +9,9 @@ import sqlite3
 
 from routers.geral import router as router_geral
 
-from services import produto_para_dict, buscar_produtos_compativeis, gerar_recomendacoes, obter_mensagem_inadequacao
-from models import PerfilPele, NovoProduto, AtualizarProduto, TextoAnalisePele
-from database import conectar_banco
+from services import produto_para_dict, gerar_recomendacoes, obter_mensagem_inadequacao
+from models import PerfilPele, NovoProduto, AtualizarProduto, TextoAnalisePele, ProdutoResposta, RespostaRecomendacoes, RespostaAnaliseTextoInsuficiente, RespostaAnaliseFotoInadequada, RespostaAnaliseFotoInsuficiente, RespostaAnaliseFotoSucesso, RespostaProdutoDesativado
+from database import gerenciar_banco, gerenciar_transacao
 from ai_service import interpretar_perfil, interpretar_foto, LimiteIAExcedido, ServicoIAIndisponivel, RespostaIAInvalida, ConfiguracaoIAInvalida
 
 app = FastAPI()
@@ -98,15 +99,62 @@ async def tratar_configuracao_ia_invalida(
     )
 
 
+@app.exception_handler(RequestValidationError)
+async def tratar_erro_validacao(
+    request: Request,
+    erro: RequestValidationError
+):
+    
+    mensagens_por_tipo = {
+        "missing": "Campo obrigatório.",
+        "literal_error": "Valor inválido.",
+        "extra_forbidden": "Campo não permitido.",
+        "bool_parsing": "Informe um número inteiro válido.",
+        "float_parsing": "Informe um número válido.",
+        "string_type": "Informe um texto válido.",
+    }
+
+    erros_formatados = []
+
+    for detalhe in erro.errors():
+        localizacao = detalhe["loc"]
+
+        campo = ".".join(
+            str(parte)
+            for parte in localizacao
+            if parte not in {"body", "query", "path"}
+        )
+
+        mensagem = mensagens_por_tipo.get(
+            detalhe["type"],
+            detalhe["msg"]
+        )
+
+        erros_formatados.append(
+            {
+                "campo": campo,
+                "mensagem": mensagem
+            }
+        )
+
+    return JSONResponse(
+        status_code=422,
+        content={
+            "status": "dados_invalidos",
+            "mensagem": "Os dados enviados são inválidos.",
+            "erros": erros_formatados
+        }
+    )
+
+
 #=========================================
 # ANÁLISE DE PELE                        #
 #=========================================
 
-@app.post("/perfil-pele", tags=["Análise de Pele"])
-def analisar_perfil_pele(perfil: PerfilPele):
-    return perfil
-
-@app.post("/analise-texto", tags=["Análise de Pele"])
+@app.post(
+        "/analise-texto",
+         response_model=RespostaRecomendacoes | RespostaAnaliseTextoInsuficiente,
+        tags=["Análise de Pele"])
 def analisar_texto(dados: TextoAnalisePele):
     resultado = interpretar_perfil(dados.texto)
 
@@ -129,7 +177,15 @@ def analisar_texto(dados: TextoAnalisePele):
 
 
 
-@app.post("/analise-foto", tags=["Análise de Pele"])
+@app.post(
+        "/analise-foto",
+         response_model=(
+             RespostaAnaliseFotoSucesso
+             | RespostaAnaliseFotoInadequada
+             | RespostaAnaliseFotoInsuficiente
+         ),
+         tags=["Análise de Pele"]
+         )
 async def analisar_foto(arquivo: UploadFile):
 
     if arquivo.content_type not in TIPOS_IMAGEM_PERMITIDOS:
@@ -224,13 +280,15 @@ async def analisar_foto(arquivo: UploadFile):
 # PRODUTOS                               #
 #=========================================
 
-@app.get("/produto/{id_produto}", tags=["Produtos"])
+@app.get(
+        "/produto/{id_produto}",
+         response_model=ProdutoResposta,
+         tags=["Produtos"])
 def obter_produto(id_produto: int):
-    conexao, cursor = conectar_banco()
+    with gerenciar_banco() as (conexao, cursor):
 
-    cursor.execute("SELECT * FROM produtos WHERE id = ?", (id_produto,))
-    produto = cursor.fetchone()
-    conexao.close()
+        cursor.execute("SELECT * FROM produtos WHERE id = ?", (id_produto,))
+        produto = cursor.fetchone()
 
     if not produto:
         raise HTTPException(
@@ -241,15 +299,61 @@ def obter_produto(id_produto: int):
 
     return dados_produtos
 
-@app.get("/produtos", tags=["Produtos"])
-def listar_produtos():
-    conexao, cursor = conectar_banco()
+@app.get(
+        "/produtos",
+        response_model=list[ProdutoResposta],
+        tags=["Produtos"])
+def listar_produtos(
+    busca: str | None = None,
+    categoria: Literal[
+        "limpeza",
+        "hidratante",
+        "serum",
+        "protetor_solar",
+        "outros"
+    ] | None = None,
+    tipo_pele: Literal[
+        "oleosa",
+        "seca",
+        "mista",
+        "normal",
+        "todos"
+    ] | None = None,
+    ativo: bool | None = None
+):
+    sql = "SELECT * FROM produtos"
+    condicoes = []
+    valores = []
 
-    cursor.execute("SELECT * FROM produtos")
-    produtos = cursor.fetchall()
-    conexao.close()
+    if busca:
+        busca = busca.strip()
+
+        if busca:
+            condicoes.append("nome LIKE ?")
+            valores.append(f"%{busca}%")
+
+    if categoria is not None:
+        condicoes.append("categoria = ?")
+        valores.append(categoria)
+
+    if tipo_pele is not None:
+        condicoes.append("tipo_pele = ?")
+        valores.append(tipo_pele)
+
+    if ativo is not None:
+        condicoes.append("ativo = ?")
+        valores.append(ativo)
+
+    if condicoes:
+        sql += " WHERE " + " AND ".join(condicoes)
+
+    with gerenciar_banco() as (conexao, cursor):
+
+        cursor.execute(sql, valores)
+        produtos = cursor.fetchall()
 
     lista_produtos = []
+
     for produto in produtos:
         dados_produto = produto_para_dict(produto)
         lista_produtos.append(dados_produto)
@@ -257,12 +361,15 @@ def listar_produtos():
     return lista_produtos
 
 
-@app.post("/produto", tags=["Produtos"])
+@app.post(
+        "/produto",
+        response_model=ProdutoResposta,
+        tags=["Produtos"])
 def criar_produto(novo_produto: NovoProduto):
-    conexao, cursor = conectar_banco()
 
     try:
-        cursor.execute(
+        with gerenciar_transacao() as (conexao, cursor):
+            cursor.execute(
         """
     INSERT INTO produtos (nome, preco, estoque, tipo_pele, pele_sensivel, indicado_para_espinha, ativo, categoria)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -270,19 +377,20 @@ def criar_produto(novo_produto: NovoProduto):
     (novo_produto.nome, novo_produto.preco, novo_produto.estoque, novo_produto.tipo_pele, novo_produto.pele_sensivel, novo_produto.indicado_para_espinha, novo_produto.ativo, novo_produto.categoria)
     )
             
-        id_produto = cursor.lastrowid
-
-        conexao.commit()
-        conexao.close()
+            id_produto = cursor.lastrowid
 
 
-    except sqlite3.IntegrityError:
-        conexao.close()
+    except sqlite3.IntegrityError as erro:
+        if erro.sqlite_errorcode == sqlite3.SQLITE_CONSTRAINT_UNIQUE:
+            raise HTTPException(
+                status_code=409,
+                detail="Produto já cadastrado"
+            )
+
         raise HTTPException(
-            status_code=409,
-            detail="Produto já cadastrado"
+            status_code=400,
+            detail="Os dados do produto violam uma regra do banco de dados"
         )
-
     
     return {
         "id": id_produto,
@@ -297,28 +405,18 @@ def criar_produto(novo_produto: NovoProduto):
         }
 
 
-@app.patch("/produto/{id_produto}", tags=["Produtos"])
+@app.patch(
+        "/produto/{id_produto}",
+         response_model=ProdutoResposta,
+        tags=["Produtos"])
 def atualizar_produto(id_produto: int, dados: AtualizarProduto):
-    conexao, cursor = conectar_banco()
 
-    cursor.execute("SELECT * FROM produtos WHERE id = ?", (id_produto,))
-
-    produto = cursor.fetchone()
-
-    if not produto:
-        conexao.close()
-        raise HTTPException(
-            status_code=404,
-            detail="Produto não encontrado"
-        )
-    
     dados_atualizados = dados.model_dump(
         exclude_unset=True,
         exclude_none=True
     )
 
     if not dados_atualizados:
-        conexao.close()
         raise HTTPException(
             status_code=400,
             detail="Nenhum dado enviado para atualização"
@@ -342,43 +440,93 @@ def atualizar_produto(id_produto: int, dados: AtualizarProduto):
     valores_sql.append(id_produto)
 
     try:
-        cursor.execute(sql, valores_sql)
-        conexao.commit()
+        with gerenciar_transacao() as (conexao, cursor):
 
-    except sqlite3.IntegrityError:
-        conexao.close()
+            cursor.execute(
+                "SELECT * FROM produtos WHERE id = ?",
+                (id_produto,)
+            )
+
+            produto = cursor.fetchone()
+
+            if not produto:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Produto não encontrado"
+                )
+
+            cursor.execute(sql, valores_sql)
+
+            cursor.execute(
+                "SELECT * FROM produtos WHERE id = ?",
+                (id_produto,)
+            )
+
+            produto_atualizado = cursor.fetchone()
+
+
+    except sqlite3.IntegrityError as erro:
+        if erro.sqlite_errorcode == sqlite3.SQLITE_CONSTRAINT_UNIQUE:
+            raise HTTPException(
+                status_code=409,
+                detail="Produto já cadastrado"
+            )
+
         raise HTTPException(
-            status_code=409,
-            detail="Produto já cadastrado"
+            status_code=400,
+            detail="Os dados do produto violam uma regra do banco de dados"
+        )
+    
+    return produto_para_dict(produto_atualizado)
+
+@app.delete(
+        "/produto/{id_produto}",
+         response_model=RespostaProdutoDesativado, tags=["Produtos"])
+def desativar_produto(id_produto: int):
+
+    with gerenciar_transacao() as (conexao, cursor):
+        cursor.execute(
+            "SELECT * FROM produtos WHERE id = ?",
+            (id_produto,)
         )
 
-    cursor.execute("SELECT * FROM produtos WHERE id = ?", (id_produto,))
-    produto_atualizado = cursor.fetchone()
-    conexao.close()
+        produto = cursor.fetchone()
 
-    produto_atualizado = produto_para_dict(produto_atualizado)
+        if not produto:
+            raise HTTPException(
+                status_code=404,
+                detail="Produto não encontrado"
+            )
 
-    return produto_atualizado
+        if not produto["ativo"]:
+            raise HTTPException(
+                status_code=409,
+                detail="O produto já está inativo"
+            )
+
+        cursor.execute(
+            """
+UPDATE produtos
+SET ativo = 0
+WHERE id = ?
+""",
+(id_produto,)
+        )
+
+    return {
+        "status": "produto_desativado",
+        "mensagem": "Produto desativado com sucesso",
+        "id": id_produto
+    }
 
 #=========================================
 # RECOMENDAÇÕES                          #
 #=========================================
 
-@app.get("/recomendacoes/{tipo_pele}", tags=["Recomendações"])
-def recomendar_produtos(tipo_pele: Literal["oleosa", "seca", "mista", "normal"]):
-
-    recomendacoes = buscar_produtos_compativeis(tipo_pele)
-
-    lista_recomendacoes = []
-
-    for recomendacao in recomendacoes:
-        recomendacoes_atualizadas = produto_para_dict(recomendacao)
-
-        lista_recomendacoes.append(recomendacoes_atualizadas)
-
-    return lista_recomendacoes
-
-@app.post("/recomendacoes", tags=["Recomendações"])
+@app.post(
+        "/recomendacoes",
+         response_model=RespostaRecomendacoes, tags=["Recomendações"]
+         )
 def recomendar_por_perfil(perfil: PerfilPele):
 
     return gerar_recomendacoes(perfil)

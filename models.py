@@ -1,7 +1,7 @@
 import math
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
-from typing import Literal
+from typing import Literal, Self
 
 
 class ModeloEstrito(BaseModel):
@@ -31,6 +31,7 @@ class TextoAnalisePele(ModeloEstrito):
         return valor
 
 class ResultadoAnaliseFoto(ModeloEstrito):
+
     imagem_adequada: bool
 
     tipo_pele: Literal["oleosa", "seca", "mista", "normal"] | None = None
@@ -95,6 +96,94 @@ class PerfilPele(ModeloEstrito):
     tipo_pele: Literal["oleosa", "seca", "mista", "normal"]
     sensivel: bool | None = None
     tem_espinha: bool | None = None
+
+class ProdutoResposta(ModeloEstrito):
+    id: int
+    nome: str
+    preco: float
+    estoque: int
+
+    tipo_pele: Literal[
+        "oleosa",
+        "seca",
+        "mista",
+        "normal",
+        "todos"
+    ]
+
+    pele_sensivel: bool
+    indicado_para_espinha: bool
+    ativo: bool
+
+    categoria: Literal[
+        "limpeza",
+        "hidratante",
+        "serum",
+        "protetor_solar",
+        "outros"
+    ]
+
+class ProdutoRecomendado(ProdutoResposta):
+    score: int
+    motivos_compatibilidade: list[str]
+
+class RespostaRecomendacoes(ModeloEstrito):
+    perfil: PerfilPele
+    total_recomendacoes: int
+
+    recomendacoes: dict[
+        Literal[
+            "limpeza",
+            "hidratante",
+            "serum",
+            "protetor_solar",
+            "outros"
+        ],
+        list[ProdutoRecomendado]
+    ]
+
+class RespostaAnaliseTextoInsuficiente(ModeloEstrito):
+    status: Literal["informacoes_insuficientes"]
+    mensagem: str
+    perfil: ResultadoAnaliseIA
+    total_recomendacoes: int
+
+    recomendacoes: dict[
+        Literal[
+            "limpeza",
+            "hidratante",
+            "serum",
+            "protetor_solar",
+            "outros"
+        ],
+        list[ProdutoRecomendado]
+    ]
+
+class RespostaAnaliseFotoInadequada(ModeloEstrito):
+    status: Literal["imagem_inadequada"]
+    mensagem: str
+    analise: ResultadoAnaliseFoto
+
+class RespostaAnaliseFotoInsuficiente(ModeloEstrito):
+    status: Literal["informacoes_insuficientes"]
+    mensagem: str
+    analise: ResultadoAnaliseFoto
+    total_recomendacoes: int
+
+    recomendacoes: dict[
+        Literal[
+            "limpeza",
+            "hidratante",
+            "serum",
+            "protetor_solar",
+            "outros"
+        ],
+        list[ProdutoRecomendado]
+    ]
+
+class RespostaAnaliseFotoSucesso(RespostaRecomendacoes):
+    status: Literal["sucesso"]
+    analise: ResultadoAnaliseFoto
 
 class NovoProduto(ModeloEstrito):
     nome: str
@@ -169,3 +258,8 @@ class AtualizarProduto(ModeloEstrito):
         if valor is not None and valor < 0:
             raise ValueError("O estoque não pode ser negativo")
         return valor
+
+class RespostaProdutoDesativado(ModeloEstrito):
+    status: Literal["produto_desativado"]
+    mensagem: str
+    id: int

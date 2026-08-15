@@ -1,4 +1,4 @@
-from database import conectar_banco
+from database import conectar_banco, gerenciar_banco
 
 def obter_mensagem_inadequacao(motivo):
     mensagens = {
@@ -45,6 +45,31 @@ def calcular_score(produto, perfil):
 
     return score
 
+def obter_motivos_compatibilidade(produto, perfil):
+    motivos = []
+
+    if produto["tipo_pele"] == perfil.tipo_pele:
+        motivos.append(
+            "Compatível com o tipo de pele identificado"
+        )
+
+    elif produto["tipo_pele"] == "todos":
+        motivos.append(
+            "Indicado para diferentes tipos de pele"
+        )
+
+    if perfil.sensivel is True and produto["pele_sensivel"]:
+        motivos.append(
+            "Adequado para pele sensível"
+        )
+
+    if perfil.tem_espinha is True and produto["indicado_para_espinha"]:
+        motivos.append(
+            "Indicado para pele com espinhas"
+        )
+
+    return motivos
+
 def agrupar_por_categoria(produtos):
     recomendacoes_por_categoria = {}
 
@@ -59,9 +84,8 @@ def agrupar_por_categoria(produtos):
     return recomendacoes_por_categoria
 
 def buscar_produtos_compativeis(tipo_pele):
-    conexao, cursor = conectar_banco()
-
-    cursor.execute(
+    with gerenciar_banco() as (conexao, cursor):
+        cursor.execute( 
         """
 SELECT * FROM produtos
 WHERE (tipo_pele = ? OR tipo_pele = 'todos')
@@ -71,8 +95,7 @@ AND ativo = 1
 (tipo_pele,)
     )
 
-    produtos = cursor.fetchall()
-    conexao.close()
+        produtos = cursor.fetchall()
 
     return produtos
 
@@ -88,7 +111,14 @@ def gerar_recomendacoes(perfil):
 
         recomendacoes_atualizadas = produto_para_dict(recomendacao)
 
+        motivos = obter_motivos_compatibilidade(
+            recomendacao,
+            perfil
+        )
+
         recomendacoes_atualizadas["score"] = score
+        
+        recomendacoes_atualizadas["motivos_compatibilidade"] = motivos
 
         lista_recomendacoes.append(recomendacoes_atualizadas)
 
