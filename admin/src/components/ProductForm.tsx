@@ -70,7 +70,7 @@ function ProductForm({
       </Form.Item>
 
       <Row gutter={16}>
-        <Col span={12}>
+        <Col xs={24} md={12}>
           <Form.Item
             label="Preço"
             name="preco"
@@ -93,7 +93,7 @@ function ProductForm({
           </Form.Item>
         </Col>
 
-        <Col span={12}>
+        <Col xs={24} md={12}>
           <Form.Item
             label="Estoque"
             name="estoque"
@@ -115,7 +115,7 @@ function ProductForm({
       </Row>
 
       <Row gutter={16}>
-        <Col span={12}>
+        <Col xs={24} md={12}>
           <Form.Item
             label="Categoria"
             name="categoria"
@@ -155,7 +155,7 @@ function ProductForm({
           </Form.Item>
         </Col>
 
-        <Col span={12}>
+        <Col xs={24} md={12}>
           <Form.Item
             label="Tipo de pele"
             name="tipo_pele"

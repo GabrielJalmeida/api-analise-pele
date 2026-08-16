@@ -104,7 +104,8 @@ function ProductTable({
       render: (_, produto) => (
         <Space size="small">
           <Button
-            type="link"
+            type="text"
+            size="small"
             onClick={() => onEditar(produto)}
           >
             Editar

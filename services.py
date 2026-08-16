@@ -1,4 +1,4 @@
-from database import conectar_banco, gerenciar_banco
+from database import gerenciar_banco
 
 def obter_mensagem_inadequacao(motivo):
     mensagens = {

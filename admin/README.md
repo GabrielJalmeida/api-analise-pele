@@ -1,75 +1,105 @@
-# React + TypeScript + Vite
+# Skin Admin
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Painel administrativo do Sistema de Análise de Pele e Recomendação de Cosméticos.
 
-Currently, two official plugins are available:
+Esta interface é responsável pelo gerenciamento do catálogo de produtos utilizado pela API.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Tecnologias
 
-## React Compiler
+- React
+- TypeScript
+- Vite
+- Ant Design
+- ESLint
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Funcionalidades
 
-## Expanding the ESLint configuration
+O painel permite:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- cadastrar produtos;
+- editar produtos;
+- pesquisar produtos por nome;
+- filtrar por categoria;
+- filtrar por tipo de pele;
+- visualizar produtos ativos e inativos;
+- desativar produtos;
+- reativar produtos;
+- acompanhar preço e estoque.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+A desativação utiliza soft delete. O produto continua registrado no banco de dados, mas deixa de participar das recomendações enquanto estiver inativo.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Comunicação com a API
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+O painel não acessa o banco SQLite diretamente.
 
+O fluxo é:
+
+```text
+React
+  ↓ HTTP/JSON
+FastAPI
+  ↓
+SQLite
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+O endereço da API é configurado através da variável:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```env
+VITE_API_URL=http://127.0.0.1:8000
 ```
+
+## Configuração
+
+Instale as dependências:
+
+```powershell
+npm install
+```
+
+Crie o arquivo local de ambiente:
+
+```powershell
+copy .env.example .env
+```
+
+O arquivo `.env.example` possui a configuração padrão:
+
+```env
+VITE_API_URL=http://127.0.0.1:8000
+```
+
+O `.env` local não deve ser enviado para o GitHub.
+
+## Desenvolvimento
+
+Com a API FastAPI em execução, inicie o painel:
+
+```powershell
+npm run dev
+```
+
+Por padrão:
+
+```text
+http://localhost:5173
+```
+
+## Validação
+
+Executar o lint:
+
+```powershell
+npm run lint
+```
+
+Gerar o build de produção:
+
+```powershell
+npm run build
+```
+
+## Segurança
+
+O painel administrativo foi desenvolvido inicialmente para utilização controlada durante o desenvolvimento do projeto.
+
+Antes da exposição pública das operações administrativas, deverá ser implementado um mecanismo de autenticação e autorização.

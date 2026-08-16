@@ -1,7 +1,7 @@
 import math
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
-from typing import Literal, Self
+from typing import Literal
 
 
 class ModeloEstrito(BaseModel):

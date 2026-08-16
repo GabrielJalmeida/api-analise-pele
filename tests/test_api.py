@@ -2,7 +2,7 @@ from io import BytesIO
 
 from PIL import Image
 
-import main
+import routers.analise as router_analise
 from models import ResultadoAnaliseFoto, ResultadoAnaliseIA
 
 
@@ -72,7 +72,7 @@ def test_crud_basico_e_recomendacao(client, produto_valido):
 
 def test_analise_por_texto_nao_depende_de_foto(client, monkeypatch):
     monkeypatch.setattr(
-        main,
+        router_analise,
         "interpretar_perfil",
         lambda texto: ResultadoAnaliseIA(
             tipo_pele="seca",
@@ -92,7 +92,7 @@ def test_analise_por_texto_nao_depende_de_foto(client, monkeypatch):
 
 def test_analise_por_foto_nao_depende_de_texto(client, monkeypatch):
     monkeypatch.setattr(
-        main,
+        router_analise,
         "interpretar_foto",
         lambda conteudo, mime_type: ResultadoAnaliseFoto(
             imagem_adequada=True,
@@ -132,7 +132,7 @@ def test_upload_rejeita_arquivo_acima_de_cinco_megabytes(client):
         files={
             "arquivo": (
                 "grande.jpg",
-                b"0" * (main.TAMANHO_MAXIMO_IMAGEM + 1),
+                b"0" * (router_analise.TAMANHO_MAXIMO_IMAGEM + 1),
                 "image/jpeg",
             )
         },
@@ -168,7 +168,7 @@ def test_analise_texto_retorna_informacoes_insuficientes(
     monkeypatch
 ):
     monkeypatch.setattr(
-        main,
+        router_analise,
         "interpretar_perfil",
         lambda texto: ResultadoAnaliseIA(
             tipo_pele=None,
@@ -194,7 +194,7 @@ def test_analise_foto_retorna_imagem_inadequada(
     monkeypatch
 ):
     monkeypatch.setattr(
-        main,
+        router_analise,
         "interpretar_foto",
         lambda conteudo, mime_type: ResultadoAnaliseFoto(
             imagem_adequada=False,
@@ -223,7 +223,7 @@ def test_analise_foto_retorna_informacoes_insuficientes(
     monkeypatch
 ):
     monkeypatch.setattr(
-        main,
+        router_analise,
         "interpretar_foto",
         lambda conteudo, mime_type: ResultadoAnaliseFoto(
             imagem_adequada=True,
