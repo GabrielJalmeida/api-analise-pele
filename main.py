@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, UploadFile, Request
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.concurrency import run_in_threadpool
 from typing import Literal
 from io import BytesIO
@@ -17,6 +18,23 @@ from ai_service import interpretar_perfil, interpretar_foto, LimiteIAExcedido, S
 app = FastAPI()
 
 app.include_router(router_geral)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+    ],
+    allow_credentials=False,
+    allow_methods=[
+        "GET",
+        "POST",
+        "PATCH",
+        "DELETE",
+    ],
+    allow_headers=[
+        "Content-Type",
+    ],
+)
 
 MIME_POR_FORMATO = {
     "JPEG": "image/jpeg",
