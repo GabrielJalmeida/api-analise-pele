@@ -9,9 +9,11 @@ from pathlib import Path
 
 from PIL import Image, ImageOps, UnidentifiedImageError
 
+from database import CAMINHO_BANCO
+
 
 BASE_DIR = Path(__file__).resolve().parent
-BANCO = BASE_DIR / "produtos.db"
+BANCO = CAMINHO_BANCO
 PASTA_IMAGENS = BASE_DIR / "media" / "produtos"
 
 CATALOGO = [{'source': 'LIMPEZA/Limpeza (1).png',

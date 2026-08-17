@@ -3,12 +3,14 @@ from typing import Literal
 
 from fastapi import (
     APIRouter,
+    Depends,
     File,
     Form,
     HTTPException,
     UploadFile,
 )
 
+from config import ambiente_producao
 from database import gerenciar_banco, gerenciar_transacao
 from models import (
     AtualizarProduto,
@@ -27,10 +29,23 @@ from product_image_service import (
 
 router = APIRouter(tags=["Produtos"])
 
+
+def bloquear_escrita_administrativa_em_producao():
+    if ambiente_producao():
+        raise HTTPException(
+            status_code=404,
+            detail="Rota não disponível neste ambiente",
+        )
+
 @router.post(
     "/produtos/imagem",
     response_model=RespostaUploadImagemProduto,
     status_code=201,
+    dependencies=[
+        Depends(
+            bloquear_escrita_administrativa_em_producao
+        )
+    ],
 )
 async def enviar_imagem_produto(
     arquivo: UploadFile = File(...),
@@ -173,6 +188,11 @@ def listar_produtos(
 @router.post(
     "/produto",
     response_model=ProdutoResposta,
+    dependencies=[
+        Depends(
+            bloquear_escrita_administrativa_em_producao
+        )
+    ],
 )
 def criar_produto(novo_produto: NovoProduto):
     try:
@@ -255,6 +275,11 @@ def criar_produto(novo_produto: NovoProduto):
 @router.patch(
     "/produto/{id_produto}",
     response_model=ProdutoResposta,
+    dependencies=[
+        Depends(
+            bloquear_escrita_administrativa_em_producao
+        )
+    ],
 )
 def atualizar_produto(
     id_produto: int,
@@ -336,6 +361,11 @@ def atualizar_produto(
 @router.delete(
     "/produto/{id_produto}",
     response_model=RespostaProdutoDesativado,
+    dependencies=[
+        Depends(
+            bloquear_escrita_administrativa_em_producao
+        )
+    ],
 )
 def desativar_produto(id_produto: int):
     with gerenciar_transacao() as (conexao, cursor):

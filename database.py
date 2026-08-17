@@ -1,10 +1,17 @@
 import sqlite3
-from pathlib import Path
 from contextlib import contextmanager
 
-CAMINHO_BANCO = Path(__file__).resolve().parent / "produtos.db"
+from config import obter_caminho_banco
+
+
+CAMINHO_BANCO = obter_caminho_banco()
 
 def conectar_banco():
+    CAMINHO_BANCO.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
     conexao = sqlite3.connect(CAMINHO_BANCO)
     conexao.row_factory = sqlite3.Row
     cursor = conexao.cursor()

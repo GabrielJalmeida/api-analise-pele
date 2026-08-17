@@ -79,6 +79,26 @@ def test_crud_basico_e_recomendacao(client, produto_valido):
     assert recomendacoes.json()["recomendacoes"]["limpeza"][0]["score"] == 7
 
 
+def test_escrita_administrativa_eh_bloqueada_em_producao(
+    client,
+    produto_valido,
+    monkeypatch,
+):
+    monkeypatch.setenv("APP_ENV", "production")
+
+    criacao = client.post(
+        "/produto",
+        json=produto_valido,
+    )
+    listagem = client.get("/produtos")
+
+    assert criacao.status_code == 404
+    assert criacao.json()["detail"] == (
+        "Rota não disponível neste ambiente"
+    )
+    assert listagem.status_code == 200
+
+
 def test_analise_por_texto_nao_depende_de_foto(client, monkeypatch):
     monkeypatch.setattr(
         router_analise,
