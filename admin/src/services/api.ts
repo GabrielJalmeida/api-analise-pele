@@ -1,8 +1,10 @@
 import type {
   AtualizarProduto,
+  CategoriaProduto,
   FiltrosProdutos,
   NovoProduto,
   Produto,
+  RespostaUploadImagemProduto,
 } from '../types/produto'
 
 const API_URL = import.meta.env.VITE_API_URL
@@ -52,6 +54,41 @@ async function validarResposta(
     resposta.status,
     mensagem,
   )
+}
+
+export async function enviarImagemProduto(
+  arquivo: File,
+  nomeProduto: string,
+  categoria: CategoriaProduto,
+): Promise<RespostaUploadImagemProduto> {
+  const formulario = new FormData()
+
+  formulario.append(
+    'arquivo',
+    arquivo,
+  )
+
+  formulario.append(
+    'nome_produto',
+    nomeProduto.trim(),
+  )
+
+  formulario.append(
+    'categoria',
+    categoria,
+  )
+
+  const resposta = await fetch(
+    `${API_URL}/produtos/imagem`,
+    {
+      method: 'POST',
+      body: formulario,
+    },
+  )
+
+  await validarResposta(resposta)
+
+  return resposta.json()
 }
 
 export async function criarProduto(

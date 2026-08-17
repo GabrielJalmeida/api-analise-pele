@@ -353,6 +353,7 @@ function App() {
           destroyOnHidden
         >
           <ProductForm
+            key={produtoEmEdicao?.id ?? 'novo'}
             onSubmit={salvarProduto}
             produtoInicial={produtoEmEdicao}
             salvando={salvandoProduto}

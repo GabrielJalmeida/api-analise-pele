@@ -1,7 +1,13 @@
 import sqlite3
 from typing import Literal
 
-from fastapi import APIRouter, HTTPException
+from fastapi import (
+    APIRouter,
+    File,
+    Form,
+    HTTPException,
+    UploadFile,
+)
 
 from database import gerenciar_banco, gerenciar_transacao
 from models import (
@@ -9,12 +15,78 @@ from models import (
     NovoProduto,
     ProdutoResposta,
     RespostaProdutoDesativado,
+    RespostaUploadImagemProduto,
 )
 from services import produto_para_dict
+from product_image_service import (
+    ImagemProdutoInvalida,
+    TAMANHO_MAXIMO_BYTES,
+    salvar_imagem_produto,
+)
 
 
 router = APIRouter(tags=["Produtos"])
 
+@router.post(
+    "/produtos/imagem",
+    response_model=RespostaUploadImagemProduto,
+    status_code=201,
+)
+async def enviar_imagem_produto(
+    arquivo: UploadFile = File(...),
+    nome_produto: str = Form(...),
+    categoria: Literal[
+        "limpeza",
+        "hidratante",
+        "serum",
+        "protetor_solar",
+        "outros",
+    ] = Form(...),
+):
+    nome_produto = nome_produto.strip()
+
+    if len(nome_produto) < 2:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "O nome do produto deve conter "
+                "pelo menos 2 caracteres"
+            ),
+        )
+
+    if len(nome_produto) > 100:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "O nome do produto não pode "
+                "ultrapassar 100 caracteres"
+            ),
+        )
+
+    try:
+        conteudo = await arquivo.read(
+            TAMANHO_MAXIMO_BYTES + 1
+        )
+
+        imagem_url = salvar_imagem_produto(
+            conteudo=conteudo,
+            nome_produto=nome_produto,
+            categoria=categoria,
+        )
+
+    except ImagemProdutoInvalida as erro:
+        raise HTTPException(
+            status_code=400,
+            detail=str(erro),
+        ) from erro
+
+    finally:
+        await arquivo.close()
+
+    return {
+        "status": "imagem_salva",
+        "imagem_url": imagem_url,
+    }
 
 @router.get(
     "/produto/{id_produto}",
@@ -115,9 +187,14 @@ def criar_produto(novo_produto: NovoProduto):
                     pele_sensivel,
                     indicado_para_espinha,
                     ativo,
-                    categoria
+                    categoria,
+                    marca,
+                    descricao_curta,
+                    imagem_url,
+                    conteudo,
+                    ativos_principais
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     novo_produto.nome,
@@ -128,6 +205,11 @@ def criar_produto(novo_produto: NovoProduto):
                     novo_produto.indicado_para_espinha,
                     novo_produto.ativo,
                     novo_produto.categoria,
+                    novo_produto.marca,
+                    novo_produto.descricao_curta,
+                    novo_produto.imagem_url,
+                    novo_produto.conteudo,
+                    novo_produto.ativos_principais,
                 ),
             )
 
@@ -163,8 +245,12 @@ def criar_produto(novo_produto: NovoProduto):
         ),
         "ativo": novo_produto.ativo,
         "categoria": novo_produto.categoria,
+        "marca": novo_produto.marca,
+        "descricao_curta": novo_produto.descricao_curta,
+        "imagem_url": novo_produto.imagem_url,
+        "conteudo": novo_produto.conteudo,
+        "ativos_principais": novo_produto.ativos_principais,
     }
-
 
 @router.patch(
     "/produto/{id_produto}",

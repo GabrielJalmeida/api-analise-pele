@@ -1,7 +1,10 @@
+from pathlib import Path
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from routers.analise import router as router_analise
 from routers.geral import router as router_geral
@@ -11,7 +14,16 @@ from routers.recomendacoes import router as router_recomendacoes
 from ai_service import LimiteIAExcedido, ServicoIAIndisponivel, RespostaIAInvalida, ConfiguracaoIAInvalida
 from config import obter_origens_cors
 
+BASE_DIR = Path(__file__).resolve().parent
+MEDIA_DIR = BASE_DIR / "media"
+
 app = FastAPI()
+
+app.mount(
+    "/media",
+    StaticFiles(directory=MEDIA_DIR),
+    name="media",
+)
 
 app.include_router(router_geral)
 app.include_router(router_produtos)

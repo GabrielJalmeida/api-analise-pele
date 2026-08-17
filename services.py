@@ -20,13 +20,20 @@ def produto_para_dict(produto):
     return {
         "id": produto["id"],
         "nome": produto["nome"],
+        "marca": produto["marca"],
+        "descricao_curta": produto["descricao_curta"],
+        "imagem_url": produto["imagem_url"],
+        "conteudo": produto["conteudo"],
+        "ativos_principais": produto["ativos_principais"],
         "preco": produto["preco"],
         "estoque": produto["estoque"],
         "tipo_pele": produto["tipo_pele"],
         "pele_sensivel": bool(produto["pele_sensivel"]),
-        "indicado_para_espinha": bool(produto["indicado_para_espinha"]),
+        "indicado_para_espinha": bool(
+            produto["indicado_para_espinha"]
+        ),
         "ativo": bool(produto["ativo"]),
-        "categoria": produto["categoria"]
+        "categoria": produto["categoria"],
     }
 
 def calcular_score(produto, perfil):

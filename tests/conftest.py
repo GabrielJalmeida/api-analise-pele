@@ -32,6 +32,21 @@ def client(banco_temporario):
 def produto_valido():
     return {
         "nome": "Gel de limpeza teste",
+
+        "marca": "Lumina Skin",
+        "descricao_curta": (
+            "Gel de limpeza facial de textura leve "
+            "para a rotina diária de cuidados."
+        ),
+        "imagem_url": (
+            "/media/produtos/"
+            "gel-limpeza-teste.webp"
+        ),
+        "conteudo": "150 ml",
+        "ativos_principais": (
+            "Niacinamida e pantenol"
+        ),
+
         "preco": 39.90,
         "estoque": 10,
         "categoria": "limpeza",

@@ -15,9 +15,18 @@ def criar_imagem_jpeg():
     return arquivo.getvalue()
 
 
-def criar_png_acima_de_vinte_megapixels():
+def criar_png_acima_de_cinquenta_megapixels():
     arquivo = BytesIO()
-    Image.new("1", (5000, 4001), color=0).save(arquivo, format="PNG")
+
+    Image.new(
+        "1",
+        (8000, 6251),
+        color=0,
+    ).save(
+        arquivo,
+        format="PNG",
+    )
+
     return arquivo.getvalue()
 
 
@@ -75,10 +84,12 @@ def test_analise_por_texto_nao_depende_de_foto(client, monkeypatch):
         router_analise,
         "interpretar_perfil",
         lambda texto: ResultadoAnaliseIA(
-            tipo_pele="seca",
-            sensivel=True,
-            tem_espinha=False,
-        ),
+    entrada_valida=True,
+    motivo_invalidacao=None,
+    tipo_pele="seca",
+    sensivel=True,
+    tem_espinha=False,
+),
     )
 
     resposta = client.post(
@@ -90,13 +101,17 @@ def test_analise_por_texto_nao_depende_de_foto(client, monkeypatch):
     assert resposta.json()["perfil"]["tipo_pele"] == "seca"
 
 
-def test_analise_por_foto_nao_depende_de_texto(client, monkeypatch):
+def test_analise_por_foto_nao_depende_de_texto(
+    client,
+    monkeypatch,
+):
     monkeypatch.setattr(
         router_analise,
         "interpretar_foto",
         lambda conteudo, mime_type: ResultadoAnaliseFoto(
             imagem_adequada=True,
             tipo_pele="normal",
+            confianca_tipo_pele="alta",
             tem_espinha=False,
         ),
     )
@@ -141,13 +156,13 @@ def test_upload_rejeita_arquivo_acima_de_cinco_megabytes(client):
     assert resposta.status_code == 413
 
 
-def test_upload_rejeita_imagem_acima_de_vinte_megapixels(client):
+def test_upload_rejeita_imagem_acima_de_cinquenta_megapixels(client):
     resposta = client.post(
         "/analise-foto",
         files={
             "arquivo": (
                 "dimensoes-grandes.png",
-                criar_png_acima_de_vinte_megapixels(),
+                criar_png_acima_de_cinquenta_megapixels(),
                 "image/png",
             )
         },
@@ -171,10 +186,12 @@ def test_analise_texto_retorna_informacoes_insuficientes(
         router_analise,
         "interpretar_perfil",
         lambda texto: ResultadoAnaliseIA(
-            tipo_pele=None,
-            sensivel=None,
-            tem_espinha=None,
-        ),
+    entrada_valida=True,
+    motivo_invalidacao=None,
+    tipo_pele=None,
+    sensivel=None,
+    tem_espinha=None,
+),
     )
 
     resposta = client.post(
@@ -354,3 +371,200 @@ def test_erro_de_validacao_tem_formato_padronizado(client):
     assert dados["erros"][0]["campo"] == "tipo_pele"
     assert dados["erros"][0]["mensagem"] == "Valor inválido."
 
+def test_analise_texto_rejeita_sujeito_nao_humano(
+    client,
+    monkeypatch,
+):
+    monkeypatch.setattr(
+        router_analise,
+        "interpretar_perfil",
+        lambda texto: ResultadoAnaliseIA(
+            entrada_valida=False,
+            motivo_invalidacao="sujeito_nao_humano",
+            tipo_pele=None,
+            sensivel=None,
+            tem_espinha=None,
+        ),
+    )
+
+    resposta = client.post(
+        "/analise-texto",
+        json={
+            "texto": (
+                "Eu sou um robô e minha lataria "
+                "vaza óleo constantemente."
+            )
+        },
+    )
+
+    assert resposta.status_code == 200
+
+    dados = resposta.json()
+
+    assert dados["status"] == "fora_escopo"
+    assert dados["motivo"] == "sujeito_nao_humano"
+
+    assert "perfil" not in dados
+    assert "recomendacoes" not in dados
+
+def test_analise_texto_rejeita_pele_artificial(
+    client,
+    monkeypatch,
+):
+    monkeypatch.setattr(
+        router_analise,
+        "interpretar_perfil",
+        lambda texto: ResultadoAnaliseIA(
+            entrada_valida=False,
+            motivo_invalidacao="fora_do_dominio",
+            tipo_pele=None,
+            sensivel=None,
+            tem_espinha=None,
+        ),
+    )
+
+    resposta = client.post(
+        "/analise-texto",
+        json={
+            "texto": (
+                "Sou uma pessoa e utilizo pele artificial. "
+                "Preciso de algo para mantê-la hidratada."
+            )
+        },
+    )
+
+    assert resposta.status_code == 200
+
+    dados = resposta.json()
+
+    assert dados["status"] == "fora_escopo"
+    assert dados["motivo"] == "fora_do_dominio"
+
+    assert "perfil" not in dados
+    assert "recomendacoes" not in dados
+
+def test_analise_foto_com_texto_divergente_exige_confirmacao(
+    client,
+    monkeypatch,
+):
+    monkeypatch.setattr(
+        router_analise,
+        "interpretar_foto",
+        lambda conteudo, mime_type: ResultadoAnaliseFoto(
+            imagem_adequada=True,
+            tipo_pele="seca",
+            confianca_tipo_pele="alta",
+            tem_espinha=True,
+            marcas_pos_acne=None,
+            vermelhidao=None,
+            descamacao=True,
+            brilho_excessivo=False,
+        ),
+    )
+
+    monkeypatch.setattr(
+        router_analise,
+        "interpretar_perfil",
+        lambda texto: ResultadoAnaliseIA(
+            entrada_valida=True,
+            motivo_invalidacao=None,
+            tipo_pele="mista",
+            sensivel=True,
+            tem_espinha=None,
+        ),
+    )
+
+    resposta = client.post(
+        "/analise-foto",
+        files={
+            "arquivo": (
+                "pele.jpg",
+                criar_imagem_jpeg(),
+                "image/jpeg",
+            ),
+        },
+        data={
+            "texto": (
+                "Minha testa fica oleosa durante o dia, "
+                "mas minhas bochechas costumam ressecar."
+            ),
+        },
+    )
+
+    assert resposta.status_code == 200
+
+    dados = resposta.json()
+
+    assert dados["status"] == "confirmacao_necessaria"
+
+    assert dados["sensivel"] is True
+    assert dados["tem_espinha"] is True
+
+    assert dados["analise"]["tipo_pele"] == "seca"
+
+    assert "perfil" not in dados
+    assert "recomendacoes" not in dados
+
+def test_analise_foto_com_texto_compativel_combina_as_fontes(
+    client,
+    monkeypatch,
+):
+    monkeypatch.setattr(
+        router_analise,
+        "interpretar_foto",
+        lambda conteudo, mime_type: ResultadoAnaliseFoto(
+            imagem_adequada=True,
+            tipo_pele="mista",
+            confianca_tipo_pele="alta",
+            tem_espinha=True,
+            marcas_pos_acne=None,
+            vermelhidao=None,
+            descamacao=False,
+            brilho_excessivo=True,
+        ),
+    )
+
+    monkeypatch.setattr(
+        router_analise,
+        "interpretar_perfil",
+        lambda texto: ResultadoAnaliseIA(
+            entrada_valida=True,
+            motivo_invalidacao=None,
+            tipo_pele="mista",
+            sensivel=True,
+            tem_espinha=None,
+        ),
+    )
+
+    resposta = client.post(
+        "/analise-foto",
+        files={
+            "arquivo": (
+                "pele.jpg",
+                criar_imagem_jpeg(),
+                "image/jpeg",
+            ),
+        },
+        data={
+            "texto": (
+                "Minha zona T costuma ficar oleosa, "
+                "mas minhas bochechas são mais secas."
+            ),
+        },
+    )
+
+    assert resposta.status_code == 200
+
+    dados = resposta.json()
+
+    assert dados["status"] == "sucesso"
+
+    assert dados["perfil"]["tipo_pele"] == "mista"
+    assert dados["perfil"]["sensivel"] is True
+
+    # O texto não informou espinhas,
+    # então aproveitamos a observação da foto.
+    assert dados["perfil"]["tem_espinha"] is True
+
+    # A análise visual continua preservada.
+    assert dados["analise"]["tipo_pele"] == "mista"
