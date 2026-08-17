@@ -1,12 +1,30 @@
-# Sistema de Análise de Pele e Recomendação de Cosméticos
+# Lumina Skin — Análise de Pele e Recomendação de Cosméticos
 
-Aplicação desenvolvida em Python com FastAPI para análise cosmética da pele e recomendação de produtos a partir de um catálogo próprio.
+Aplicação full stack para interpretar características cosméticas da pele e revelar uma curadoria de produtos compatíveis com o perfil informado.
 
-O projeto combina inteligência artificial, regras determinísticas de recomendação, gerenciamento de produtos e um painel administrativo desenvolvido em React.
+O projeto combina um backend em FastAPI, inteligência artificial Gemini, regras determinísticas de recomendação, catálogo próprio com 50 produtos, frontend público e painel administrativo.
 
-A IA é utilizada para interpretar informações fornecidas pelo usuário, mas **não escolhe diretamente os produtos recomendados**.
+> A análise possui finalidade informativa e cosmética. O sistema não realiza diagnóstico médico e não substitui avaliação dermatológica.
 
-O fluxo principal é:
+## Versão atual
+
+**v3.8.0 — frontend público, catálogo visual e publicação da aplicação.**
+
+- Site público: [https://lumina-skin-lyart.vercel.app](https://lumina-skin-lyart.vercel.app)
+- API: [https://api-production-f6fd.up.railway.app](https://api-production-f6fd.up.railway.app)
+- Documentação da API: [https://api-production-f6fd.up.railway.app/docs](https://api-production-f6fd.up.railway.app/docs)
+
+O painel administrativo permanece local nesta versão. As operações administrativas de escrita são bloqueadas no ambiente público enquanto não houver autenticação.
+
+## Como o sistema funciona
+
+O usuário pode escolher livremente entre três caminhos independentes:
+
+- enviar uma fotografia;
+- descrever a pele por texto;
+- informar diretamente um perfil conhecido, sem utilizar IA.
+
+A fotografia não é obrigatória. O frontend decide como apresentar e destacar cada opção, enquanto o backend valida apenas os dados da rota utilizada.
 
 ```text
 Foto ou descrição
@@ -15,429 +33,70 @@ Foto ou descrição
         ↓
 Perfil estruturado da pele
         ↓
-Motor de recomendação da API
+Motor determinístico da API
         ↓
-Produtos do catálogo
+Curadoria de produtos compatíveis
 ```
 
-Também é possível utilizar o sistema sem análise por IA quando o perfil da pele já é conhecido:
+A IA interpreta as informações, mas **não escolhe produtos**. A seleção do catálogo é executada por regras controladas e testáveis no backend.
 
-```text
-Perfil informado diretamente
-        ↓
-Motor de recomendação
-        ↓
-Produtos do catálogo
-```
+## Funcionalidades da v3.8.0
 
-> A análise possui finalidade informativa e cosmética. O sistema não realiza diagnóstico médico e não substitui avaliação dermatológica.
+### Experiência pública
 
----
-
-## Status do projeto
-
-O projeto está atualmente na **Versão 3**.
-
-### Evolução
-
-- **V1** — criação da API e regras iniciais;
-- **V2** — integração com IA, evolução do backend e criação do painel administrativo;
-- **V3** — reorganização da arquitetura, preparação para exposição da API e desenvolvimento da interface pública;
-- **V4** — etapa planejada para finalização, distribuição e acabamento do projeto.
-
-A V3 mantém o painel administrativo criado anteriormente e prepara a aplicação para receber o frontend público.
-
----
-
-## Funcionalidades
-
-### Análise de pele
-
-O sistema possui três formas independentes de entrada:
-
+- interface responsiva em React, TypeScript, Vite, Tailwind CSS e Motion;
 - análise por fotografia;
 - análise por descrição textual;
-- recomendação a partir de um perfil de pele já conhecido.
-
-O frontend pode decidir qual dessas experiências oferecer ao usuário.
+- recomendação sem IA a partir de perfil informado diretamente;
+- tratamento de informações insuficientes e assuntos fora do escopo;
+- confirmação do tipo de pele quando fotografia e texto apresentam resultados diferentes;
+- observações visuais intermediárias durante o resultado da fotografia;
+- recomendações organizadas por categoria;
+- cards com imagem, marca, nome, descrição, conteúdo, preço, ativos e motivos de compatibilidade;
+- identidade visual própria da Lumina Skin.
 
 ### Análise por fotografia
 
-A rota de fotografia:
-
 - aceita JPG, PNG e WEBP;
-- limita arquivos a 5 MB;
-- limita imagens a 20 megapixels;
-- verifica se o arquivo realmente é uma imagem válida;
-- sanitiza a imagem antes do envio à IA;
-- remove metadados EXIF desnecessários;
-- preserva corretamente a orientação da fotografia;
-- não armazena a imagem no banco de dados.
+- limita arquivos a 5 MB e imagens a 50 megapixels;
+- verifica MIME type, formato real e integridade do arquivo;
+- corrige a orientação EXIF;
+- remove metadados desnecessários;
+- reduz dimensões antes do envio à IA;
+- não armazena a fotografia analisada.
+
+A leitura visual pode observar:
+
+- tipo de pele e confiança da classificação;
+- espinhas;
+- marcas pós-acne;
+- vermelhidão;
+- descamação;
+- brilho excessivo.
+
+Sensibilidade não é inferida exclusivamente pela imagem. Quando informada, ela vem da descrição complementar do usuário.
 
 ### Análise por texto
 
-A IA interpreta a descrição fornecida pelo usuário e tenta gerar um perfil estruturado da pele.
+A IA interpreta a descrição e tenta estruturar:
 
-Quando não existem informações suficientes para identificar o perfil, a API retorna explicitamente esse estado em vez de inventar uma classificação.
+- tipo de pele;
+- sensibilidade;
+- presença de espinhas.
 
-### Recomendação de produtos
+O fluxo distingue respostas válidas, informações insuficientes e conteúdo fora do domínio. Também possui proteções contra sujeito não humano e instruções adversariais.
 
-A inteligência artificial **não possui autoridade para selecionar produtos**.
+### Catálogo e recomendações
 
-Depois da interpretação do perfil, a decisão é realizada por regras implementadas no backend.
+O catálogo da demonstração contém 50 produtos distribuídos entre:
 
-Isso separa duas responsabilidades:
+- limpeza;
+- sérum;
+- hidratação;
+- proteção solar;
+- outros cuidados.
 
-```text
-IA
-└── interpreta informações
-
-Backend
-└── decide quais produtos recomendar
-```
-
-Essa arquitetura torna o comportamento mais previsível, testável e controlável.
-
----
-
-# Painel administrativo
-
-O projeto inclui uma interface administrativa para gerenciamento do catálogo.
-
-Tecnologias:
-
-- React;
-- TypeScript;
-- Vite;
-- Ant Design.
-
-O painel permite:
-
-- cadastrar produtos;
-- editar produtos;
-- consultar o catálogo;
-- pesquisar por nome;
-- filtrar por categoria;
-- filtrar por tipo de pele;
-- filtrar por status;
-- desativar produtos;
-- reativar produtos;
-- acompanhar estoque;
-- visualizar produtos ativos e inativos.
-
-A exclusão utiliza **soft delete**.
-
-Isso significa que um produto desativado continua registrado no banco, mas deixa de participar das recomendações.
-
----
-
-# Tecnologias
-
-## Backend
-
-- Python;
-- FastAPI;
-- Uvicorn;
-- Pydantic;
-- SQLite;
-- Google Gen AI SDK;
-- Pillow;
-- python-dotenv.
-
-## Frontend administrativo
-
-- React;
-- TypeScript;
-- Vite;
-- Ant Design;
-- ESLint.
-
-## Testes
-
-- Pytest;
-- FastAPI TestClient;
-- banco SQLite temporário;
-- respostas simuladas da IA.
-
----
-
-# Arquitetura do backend
-
-A aplicação foi organizada utilizando routers para separar as principais responsabilidades.
-
-```text
-main.py
-│
-├── criação da aplicação FastAPI
-├── configuração de CORS
-├── registro dos routers
-└── tratamento global de erros
-
-routers/
-│
-├── geral.py
-│   └── status da aplicação
-│
-├── produtos.py
-│   └── gerenciamento do catálogo
-│
-├── recomendacoes.py
-│   └── recomendação por perfil conhecido
-│
-└── analise.py
-    ├── análise textual
-    └── análise de fotografia
-```
-
-Outros módulos possuem responsabilidades específicas:
-
-```text
-ai_service.py
-└── comunicação com o Gemini
-
-services.py
-└── regras de negócio e recomendações
-
-database.py
-└── conexão e transações SQLite
-
-models.py
-└── modelos e validações Pydantic
-
-config.py
-└── configurações dependentes do ambiente
-```
-
----
-
-# Estrutura do projeto
-
-```text
-analise-pele-V3/
-│
-├── admin/
-│   ├── public/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── ProductFilters.tsx
-│   │   │   ├── ProductForm.tsx
-│   │   │   └── ProductTable.tsx
-│   │   │
-│   │   ├── services/
-│   │   │   └── api.ts
-│   │   │
-│   │   ├── types/
-│   │   │   └── produto.ts
-│   │   │
-│   │   ├── App.tsx
-│   │   ├── App.css
-│   │   ├── main.tsx
-│   │   └── index.css
-│   │
-│   ├── .env.example
-│   ├── package.json
-│   └── vite.config.ts
-│
-├── routers/
-│   ├── __init__.py
-│   ├── analise.py
-│   ├── geral.py
-│   ├── produtos.py
-│   └── recomendacoes.py
-│
-├── tests/
-│   ├── conftest.py
-│   ├── test_ai_config.py
-│   ├── test_api.py
-│   ├── test_config.py
-│   ├── test_imagem.py
-│   └── test_models.py
-│
-├── ai_service.py
-├── config.py
-├── criar_banco.py
-├── database.py
-├── main.py
-├── models.py
-├── services.py
-├── .env.example
-├── .gitignore
-├── requirements.txt
-├── requirements-dev.txt
-└── README.md
-```
-
----
-
-# Configuração do backend
-
-## 1. Criar o ambiente virtual
-
-Na raiz do projeto:
-
-```powershell
-python -m venv .venv
-```
-
-No Windows:
-
-```powershell
-.venv\Scripts\activate
-```
-
----
-
-## 2. Instalar as dependências
-
-Para executar somente a aplicação:
-
-```powershell
-pip install -r requirements.txt
-```
-
-Para desenvolvimento e testes:
-
-```powershell
-pip install -r requirements-dev.txt
-```
-
----
-
-## 3. Configurar variáveis de ambiente
-
-Crie o arquivo `.env` a partir do exemplo:
-
-```powershell
-copy .env.example .env
-```
-
-Exemplo:
-
-```env
-GEMINI_API_KEY=sua_chave_aqui
-GEMINI_MODEL=gemini-3.5-flash-lite
-
-CORS_ORIGINS=http://localhost:5173
-```
-
-Nunca envie a chave real da API para o GitHub.
-
-O arquivo `.env` está ignorado pelo Git.
-
-### Múltiplas origens CORS
-
-As origens podem ser separadas por vírgula:
-
-```env
-CORS_ORIGINS=http://localhost:5173,http://localhost:5174,https://exemplo.com
-```
-
-Isso permite configurar diferentes frontends sem alterar o código Python.
-
----
-
-# Funcionamento sem chave de IA
-
-A aplicação consegue iniciar mesmo sem `GEMINI_API_KEY`.
-
-Nesse cenário continuam disponíveis as funcionalidades que não dependem da IA, como:
-
-- CRUD de produtos;
-- painel administrativo;
-- consulta do catálogo;
-- recomendação a partir de um perfil conhecido.
-
-As rotas que realmente precisam do Gemini retornam indisponibilidade enquanto a chave não estiver configurada.
-
-Essa separação permite que o motor de recomendação continue funcionando independentemente do serviço de IA.
-
----
-
-# Banco de dados
-
-O projeto utiliza SQLite.
-
-Para criar a estrutura inicial:
-
-```powershell
-python criar_banco.py
-```
-
-O banco local não deve ser enviado para o GitHub.
-
----
-
-# Executando a API
-
-Na raiz:
-
-```powershell
-uvicorn main:app --reload
-```
-
-Servidor local:
-
-```text
-http://127.0.0.1:8000
-```
-
-Documentação interativa:
-
-```text
-http://127.0.0.1:8000/docs
-```
-
----
-
-# Rotas principais
-
-## Geral
-
-```text
-GET /
-GET /status
-```
-
-## Produtos
-
-```text
-GET    /produto/{id_produto}
-GET    /produtos
-POST   /produto
-PATCH  /produto/{id_produto}
-DELETE /produto/{id_produto}
-```
-
-`DELETE` realiza desativação lógica do produto.
-
-## Recomendações
-
-```text
-POST /recomendacoes
-```
-
-Recebe um perfil conhecido e executa o motor determinístico de recomendação.
-
-## Análise de pele
-
-```text
-POST /analise-texto
-POST /analise-foto
-```
-
-Essas são as rotas que utilizam inteligência artificial.
-
----
-
-# Regras atuais de recomendação
-
-Antes de participar das recomendações, o produto deve:
-
-- estar ativo;
-- possuir estoque disponível;
-- ser compatível com o tipo de pele informado ou estar marcado para todos os tipos.
-
-A pontuação atual considera:
+Antes de participar das recomendações, o produto precisa estar ativo, possuir estoque e ser compatível com o tipo de pele informado ou marcado para todos os tipos.
 
 | Regra | Pontuação |
 |---|---:|
@@ -446,186 +105,272 @@ A pontuação atual considera:
 | Compatível com pele sensível | +2 |
 | Indicado para espinhas | +2 |
 
-Depois da pontuação, os produtos são organizados por categoria.
+A pontuação determina a ordem interna das recomendações, mas não é apresentada ao usuário final.
 
-Características como sensibilidade e indicação para espinhas atualmente aumentam a relevância do produto, mas não funcionam como exclusões absolutas.
+### Imagens dos produtos
 
----
+O painel administrativo permite enviar imagens JPG, PNG ou WEBP. O backend:
 
-# Segurança e privacidade de imagens
+- valida arquivos de até 10 MB e 40 megapixels;
+- corrige orientação EXIF;
+- limita a maior dimensão a 1600 pixels;
+- converte a imagem para WebP;
+- gera um nome seguro com identificador único;
+- publica o arquivo em `/media/produtos/{categoria}/...`.
 
-Antes de enviar uma fotografia para análise, a API executa validações de:
+## Painel administrativo
 
-- MIME type;
-- formato real;
-- tamanho do arquivo;
-- quantidade de pixels;
-- integridade da imagem.
+O projeto inclui um painel local desenvolvido com React, TypeScript, Vite e Ant Design.
 
-Depois da validação, uma nova representação da imagem é gerada em memória.
+Ele permite:
 
-Esse processo:
+- cadastrar e editar produtos;
+- enviar imagens;
+- consultar e pesquisar o catálogo;
+- filtrar por categoria, tipo de pele e status;
+- acompanhar estoque;
+- desativar e reativar produtos.
 
-- aplica corretamente a orientação EXIF;
-- remove metadados desnecessários;
-- evita encaminhar os bytes originais diretamente para a IA.
+A exclusão utiliza soft delete: o produto permanece no banco, mas deixa de participar das recomendações.
 
-A aplicação não possui necessidade de armazenar as fotografias analisadas no banco de dados.
+## Tecnologias
 
----
+### Backend
 
-# Configuração do painel administrativo
+- Python;
+- FastAPI e Uvicorn;
+- Pydantic;
+- SQLite;
+- Google Gen AI SDK;
+- Pillow;
+- python-dotenv;
+- Pytest.
 
-Entre na pasta:
+### Frontend público
 
-```powershell
-cd admin
+- React;
+- TypeScript;
+- Vite;
+- Tailwind CSS;
+- Motion.
+
+### Painel administrativo
+
+- React;
+- TypeScript;
+- Vite;
+- Ant Design.
+
+### Hospedagem
+
+- frontend público na Vercel;
+- backend e volume persistente na Railway;
+- SQLite armazenado no volume da aplicação.
+
+## Estrutura principal
+
+```text
+analise-pele-V3/
+├── admin/                    # painel administrativo local
+├── frontend/                 # interface pública
+├── media/produtos/           # imagens do catálogo
+├── routers/
+│   ├── analise.py
+│   ├── geral.py
+│   ├── produtos.py
+│   └── recomendacoes.py
+├── tests/
+├── ai_service.py             # comunicação com o Gemini
+├── config.py                 # configuração por ambiente
+├── criar_banco.py
+├── database.py
+├── main.py
+├── models.py
+├── popular_catalogo.py       # carga automatizada do catálogo
+├── product_image_service.py  # processamento de imagens de produto
+├── services.py               # regras de recomendação
+├── railway.json
+├── requirements.txt
+└── README.md
+```
+
+## Configuração local do backend
+
+Na raiz do projeto, crie e ative o ambiente virtual:
+
+```cmd
+python -m venv .venv
+.venv\Scripts\activate
 ```
 
 Instale as dependências:
 
-```powershell
-npm install
+```cmd
+python -m pip install -r requirements.txt
 ```
 
-Crie o `.env`:
+Para desenvolvimento e testes:
 
-```powershell
+```cmd
+python -m pip install -r requirements-dev.txt
+```
+
+Crie o arquivo local de configuração:
+
+```cmd
 copy .env.example .env
 ```
 
-Configuração padrão:
+Exemplo:
+
+```env
+GEMINI_API_KEY=sua_chave_aqui
+GEMINI_MODEL=gemini-3.5-flash-lite
+APP_ENV=development
+DATABASE_PATH=produtos.db
+CORS_ORIGINS=http://localhost:5173
+```
+
+Nunca envie a chave real ao GitHub ou ao frontend.
+
+Crie o banco e, se desejar o catálogo de demonstração, execute:
+
+```cmd
+python criar_banco.py
+python popular_catalogo.py --aplicar
+```
+
+Inicie a API:
+
+```cmd
+uvicorn main:app --reload
+```
+
+Endereços locais:
+
+- API: `http://127.0.0.1:8000`
+- Swagger: `http://127.0.0.1:8000/docs`
+
+## Configuração do frontend público
+
+```cmd
+cd frontend
+npm install
+copy .env.example .env
+npm run dev
+```
+
+Configuração local:
 
 ```env
 VITE_API_URL=http://127.0.0.1:8000
 ```
 
-Execute:
-
-```powershell
-npm run dev
-```
-
-Por padrão, o Vite disponibiliza o painel localmente em:
-
-```text
-http://localhost:5173
-```
-
----
-
-# Validação do frontend administrativo
-
-Lint:
-
-```powershell
-npm run lint
-```
-
 Build de produção:
 
-```powershell
+```cmd
 npm run build
 ```
 
----
+## Configuração do painel administrativo
 
-# Testes automatizados
-
-Na raiz do projeto:
-
-```powershell
-pytest -v
+```cmd
+cd admin
+npm install
+copy .env.example .env
+npm run dev
 ```
 
-No checkpoint atual da V3:
+Configuração local:
+
+```env
+VITE_API_URL=http://127.0.0.1:8000
+```
+
+O painel não deve ser disponibilizado publicamente antes da implementação de autenticação.
+
+## Rotas principais
 
 ```text
-28 testes aprovados
+GET    /
+GET    /status
+
+GET    /produto/{id_produto}
+GET    /produtos
+POST   /produto
+PATCH  /produto/{id_produto}
+DELETE /produto/{id_produto}
+POST   /produtos/imagem
+
+POST   /perfil-pele
+POST   /analise-texto
+POST   /analise-foto
+POST   /recomendacoes
 ```
 
-A suíte verifica, entre outros pontos:
+As rotas administrativas de escrita permanecem disponíveis no desenvolvimento local e são ocultadas no ambiente público da v3.8.0.
 
-- inicialização sem chave de IA;
-- indisponibilidade controlada das rotas de IA;
-- CRUD de produtos;
-- recomendações;
-- filtros;
-- soft delete;
-- análise textual;
-- análise de fotografia;
-- validação de uploads;
-- limite de 5 MB;
-- limite de 20 megapixels;
-- respostas insuficientes;
-- imagens inadequadas;
-- padronização dos erros de validação;
-- configuração de CORS;
-- remoção de EXIF;
-- validações dos modelos Pydantic.
+## Testes e builds
 
-Os testes da IA utilizam simulações, portanto a suíte automatizada não precisa consumir quota real do Gemini.
-
----
-
-# Validação atual
-
-O checkpoint atual da V3 foi validado com:
+Checkpoint da v3.8.0:
 
 ```text
-Backend
-28 testes aprovados
-
-Admin
-ESLint aprovado
-TypeScript aprovado
-Build Vite aprovado
+Backend:          35 testes aprovados
+Frontend público: build aprovado
+Admin:            build aprovado
 ```
 
-O Vite atualmente informa um aviso relacionado ao tamanho do bundle de produção.
+Execute a suíte do backend com:
 
-Esse aviso não impede o funcionamento da aplicação e a divisão do bundle poderá ser realizada posteriormente caso se torne necessária.
-
----
-
-# Próximas etapas
-
-Durante a V3 serão desenvolvidos os componentes necessários para a experiência pública da aplicação.
-
-Entre os próximos objetivos estão:
-
-- frontend público;
-- experiência de análise por fotografia;
-- experiência de análise por descrição;
-- opção de recomendação sem IA;
-- apresentação visual das recomendações;
-- preparação da API para publicação;
-- proteção das funcionalidades administrativas.
-
-A autenticação das rotas administrativas deve ser implementada antes da exposição pública dessas operações.
-
-Na V4 serão concentradas as etapas finais de acabamento, distribuição e empacotamento do projeto.
-
----
-
-# Objetivo
-
-Além de seu contexto acadêmico, o projeto é desenvolvido como uma aplicação funcional de portfólio.
-
-O objetivo é demonstrar integração entre:
-
-```text
-Frontend
-+
-API
-+
-Banco de dados
-+
-Inteligência artificial
-+
-Regras de negócio
-+
-Testes automatizados
+```cmd
+python -m pytest -q
 ```
 
-sem delegar toda a lógica da aplicação à inteligência artificial.
+Os testes usam banco temporário e respostas simuladas da IA, portanto não consomem chave nem quota do Gemini.
+
+Existem dois avisos externos conhecidos relacionados ao TestClient/HTTPX e ao Google Gen AI SDK. Eles não impedem a execução dos testes.
+
+## Variáveis utilizadas em produção
+
+Backend:
+
+```env
+APP_ENV=production
+DATABASE_PATH=/data/produtos.db
+GEMINI_API_KEY=chave_configurada_no_servidor
+GEMINI_MODEL=gemini-3.5-flash-lite
+CORS_ORIGINS=https://lumina-skin-lyart.vercel.app
+```
+
+Frontend:
+
+```env
+VITE_API_URL=https://api-production-f6fd.up.railway.app
+```
+
+## Limites conhecidos desta versão
+
+A v3.8.0 é uma versão funcional para demonstração acadêmica e portfólio. Permanecem planejados para a auditoria técnica da V4:
+
+- autenticação e autorização do painel administrativo;
+- tratamento automático de imagens órfãs;
+- auditoria de instalação limpa e dependências;
+- observabilidade e tratamento ampliado de falhas transitórias de rede;
+- revisão da persistência e dos uploads para produção;
+- otimização do bundle do painel;
+- revisão completa de segurança e documentação.
+
+Em hospedagens gratuitas, reinicializações e oscilações ocasionais de rede podem exigir uma nova tentativa da solicitação.
+
+## Evolução do projeto
+
+- **V1** — API e regras iniciais de recomendação;
+- **V2** — integração com IA, estabilização do backend e painel administrativo;
+- **V3.0 alpha** — preparação da arquitetura para a experiência pública;
+- **V3.8.0** — frontend público, catálogo visual completo e aplicação hospedada;
+- **V4** — auditoria técnica e endurecimento para uso externo;
+- **V5** — melhorias orientadas por feedback e finalização.
+
+## Objetivo
+
+Além de seu contexto acadêmico, o projeto demonstra a integração entre frontend, API, banco de dados, inteligência artificial, processamento de imagens, regras de negócio e testes automatizados, sem delegar toda a decisão do sistema à IA.
