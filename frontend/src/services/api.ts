@@ -5,6 +5,10 @@ import type {
   RespostaRecomendacoes,
 } from '../types/analise'
 
+import {
+  otimizarImagemParaAnalise,
+} from './image'
+
 const API_URL = import.meta.env.VITE_API_URL
 
 interface ErroValidacao {
@@ -93,19 +97,24 @@ export async function analisarFoto(
   arquivo: File,
   texto?: string,
 ): Promise<RespostaAnaliseFoto> {
+  const arquivoPreparado =
+    await otimizarImagemParaAnalise(
+      arquivo,
+    )
+
   const formulario = new FormData()
 
   formulario.append(
     'arquivo',
-    arquivo,
+    arquivoPreparado,
   )
 
   if (texto?.trim()) {
-  formulario.append(
-    'texto',
-    texto.trim(),
-  )
-}
+    formulario.append(
+      'texto',
+      texto.trim(),
+    )
+  }
 
   const response = await fetch(
     `${API_URL}/analise-foto`,

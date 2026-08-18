@@ -198,6 +198,20 @@ def test_rota_raiz_confirma_funcionamento(client):
         "message": "A API está funcionando!"
     }
 
+
+def test_resposta_inclui_dados_de_rastreamento(
+    client,
+):
+    resposta = client.get("/status")
+
+    assert resposta.status_code == 200
+    assert resposta.headers[
+        "x-request-id"
+    ]
+    assert resposta.headers[
+        "server-timing"
+    ].startswith("app;dur=")
+
 def test_analise_texto_retorna_informacoes_insuficientes(
     client,
     monkeypatch
@@ -284,6 +298,9 @@ def test_analise_foto_retorna_informacoes_insuficientes(
     assert resposta.json()["status"] == "informacoes_insuficientes"
     assert resposta.json()["total_recomendacoes"] == 0
     assert resposta.json()["recomendacoes"] == {}
+    assert "área visível" in (
+        resposta.json()["mensagem"].lower()
+    )
 
 def test_listagem_de_produtos_aceita_filtros(client, produto_valido):
     client.post("/produto", json=produto_valido)

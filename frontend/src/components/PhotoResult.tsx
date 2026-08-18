@@ -277,7 +277,7 @@ function PhotoResult({
 
           <div className="mt-10 grid gap-3 border-t border-[#e0dad2] pt-8 sm:grid-cols-3">
             {[
-              'Rosto bem visível',
+              'Área facial nítida e visível',
               'Iluminação uniforme',
               'Sem filtros ou interferências',
             ].map((dica) => (
@@ -355,16 +355,19 @@ function PhotoResult({
           </p>
 
           <p className="mt-5 max-w-2xl text-xs leading-6 text-[#8a8d87]">
-            Iluminação, ângulo, resolução e outras
-            características da imagem podem alterar
-            a leitura visual.
+            Uma região isolada ainda pode revelar
+            características locais, mas normalmente
+            não representa o comportamento do rosto
+            inteiro. Mostre mais regiões ou acrescente
+            uma descrição sobre como sua pele se
+            comporta ao longo do dia.
           </p>
 
           <a
             href="#experiencia-analise"
             className="mt-8 inline-flex rounded-full bg-[#0d1b2a] px-7 py-3.5 text-sm font-medium text-white"
           >
-            Tentar outra foto
+            Tentar outra foto ou complementar
           </a>
         </motion.div>
       </section>

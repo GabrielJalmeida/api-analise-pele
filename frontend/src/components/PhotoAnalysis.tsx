@@ -59,6 +59,9 @@ function PhotoAnalysis({
   const [carregando, setCarregando] =
     useState(false)
 
+  const [segundosEspera, setSegundosEspera] =
+    useState(0)
+
   const textoPreenchido =
     textoComplementar.trim().length > 0
 
@@ -81,6 +84,33 @@ function PhotoAnalysis({
       URL.revokeObjectURL(url)
     }
   }, [arquivo])
+
+  useEffect(() => {
+    if (!carregando) {
+      setSegundosEspera(0)
+      return
+    }
+
+    const temporizador =
+      window.setInterval(() => {
+        setSegundosEspera(
+          (segundos) => segundos + 1,
+        )
+      }, 1000)
+
+    return () => {
+      window.clearInterval(
+        temporizador,
+      )
+    }
+  }, [carregando])
+
+  const mensagemCarregamento =
+    segundosEspera < 8
+      ? 'Preparando a imagem e iniciando a leitura visual.'
+      : segundosEspera < 25
+        ? 'A inteligência artificial está examinando apenas as características visíveis.'
+        : 'A análise ainda está em andamento. Mantenha esta página aberta; algumas imagens podem levar mais tempo.'
 
   function selecionarArquivo(
     evento: ChangeEvent<HTMLInputElement>,
@@ -161,7 +191,7 @@ function PhotoAnalysis({
         erroRecebido instanceof TypeError
       ) {
         setErro(
-          'Não foi possível conectar ao serviço. Tente novamente em alguns instantes.',
+          'A conexão foi interrompida durante a análise. Sua foto continua selecionada; tente novamente.',
         )
         return
       }
@@ -196,7 +226,19 @@ function PhotoAnalysis({
             </span>
 
             <span>
-              Mantenha rosto e pele bem visíveis.
+              Pode ser o rosto inteiro ou uma região
+              ampla, como uma bochecha.
+            </span>
+          </div>
+
+          <div className="flex gap-2">
+            <span className="text-[#879681]">
+              ✓
+            </span>
+
+            <span>
+              Mais regiões visíveis ajudam a estimar
+              o tipo de pele.
             </span>
           </div>
 
@@ -216,17 +258,8 @@ function PhotoAnalysis({
             </span>
 
             <span>
-              Evite filtros e maquiagem intensa.
-            </span>
-          </div>
-
-          <div className="flex gap-2">
-            <span className="text-[#879681]">
-              ✓
-            </span>
-
-            <span>
-              Evite analisar a pele molhada.
+              Evite filtros, maquiagem intensa e
+              pele molhada.
             </span>
           </div>
         </div>
@@ -277,8 +310,9 @@ function PhotoAnalysis({
           </p>
 
           <p className="mt-3 max-w-md text-sm leading-7 text-[#777a74]">
-            Use uma imagem clara, sem filtros e
-            com uma boa área da pele facial visível.
+            Uma região facial pode ser analisada,
+            mas uma foto mais ampla ajuda a estimar
+            o perfil do rosto inteiro.
           </p>
 
           <span className="mt-6 text-xs uppercase tracking-[0.18em] text-[#9b8c79]">
@@ -460,9 +494,9 @@ function PhotoAnalysis({
 
                   <p className="mt-2 max-w-xl text-xs leading-5 text-[#858982]">
                     É opcional. Essas informações
-                    podem ajudar quando uma
-                    característica não estiver clara
-                    apenas pela imagem.
+                    ajudam especialmente quando a
+                    fotografia mostra somente uma
+                    região do rosto.
                   </p>
 
                   <textarea
@@ -548,6 +582,8 @@ function PhotoAnalysis({
                 >
                   {carregando
                     ? 'Analisando...'
+                    : erro
+                      ? 'Tentar novamente'
                     : textoPreenchido
                       ? 'Analisar foto e descrição'
                       : 'Analisar esta foto'}
@@ -617,9 +653,7 @@ function PhotoAnalysis({
             </p>
 
             <p className="mt-1 text-xs leading-5 text-[#777b75]">
-              {textoPreenchido
-                ? 'A imagem e as informações complementares estão sendo processadas.'
-                : 'A imagem está sendo processada. O resultado aparecerá em seguida.'}
+              {mensagemCarregamento}
             </p>
           </div>
         </motion.div>

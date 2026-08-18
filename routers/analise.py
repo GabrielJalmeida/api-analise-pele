@@ -65,7 +65,7 @@ TOTAL_MAXIMO_PIXELS = (
     50_000_000
 )
 
-DIMENSAO_MAXIMA_ANALISE = 4096
+DIMENSAO_MAXIMA_ANALISE = 2048
 
 
 def sanitizar_imagem(
@@ -92,6 +92,8 @@ def sanitizar_imagem(
             Image.Resampling.LANCZOS,
         )
 
+        parametros_salvamento = {}
+
         if formato == "JPEG":
             imagem_limpa = (
                 imagem_limpa.convert(
@@ -99,11 +101,39 @@ def sanitizar_imagem(
                 )
             )
 
+            parametros_salvamento = {
+                "quality": 85,
+                "optimize": True,
+                "progressive": True,
+            }
+
+        elif formato == "WEBP":
+            if imagem_limpa.mode not in {
+                "RGB",
+                "RGBA",
+            }:
+                imagem_limpa = (
+                    imagem_limpa.convert(
+                        "RGB"
+                    )
+                )
+
+            parametros_salvamento = {
+                "quality": 85,
+                "method": 4,
+            }
+
+        elif formato == "PNG":
+            parametros_salvamento = {
+                "compress_level": 4,
+            }
+
         buffer = BytesIO()
 
         imagem_limpa.save(
             buffer,
             format=formato,
+            **parametros_salvamento,
         )
 
         return buffer.getvalue()
@@ -304,7 +334,8 @@ async def analisar_foto(
     )
 
     conteudo_sanitizado = (
-        sanitizar_imagem(
+        await run_in_threadpool(
+            sanitizar_imagem,
             conteudo,
             formato_real,
         )
@@ -399,9 +430,12 @@ async def analisar_foto(
             "status":
                 "informacoes_insuficientes",
             "mensagem": (
-                "A análise foi concluída, "
-                "mas não foi possível estimar "
-                "o tipo de pele com segurança."
+                "A área visível permitiu observações "
+                "locais, mas não foi suficiente para "
+                "estimar o tipo de pele do rosto "
+                "inteiro com segurança. Envie uma "
+                "foto mais ampla ou complemente a "
+                "análise com uma descrição."
             ),
             "analise":
                 resultado_foto.model_dump(),

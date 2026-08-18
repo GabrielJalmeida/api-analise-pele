@@ -33,7 +33,7 @@ const conteudo = {
     marcador: 'Análise visual',
     titulo: 'Vamos começar pela sua foto.',
     descricao:
-      'Selecione uma imagem clara do rosto para conferir antes de iniciar a análise.',
+      'Selecione uma imagem clara do rosto ou de uma região facial. Fotos mais amplas ajudam a estimar o tipo de pele.',
   },
 
   texto: {

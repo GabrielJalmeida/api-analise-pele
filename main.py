@@ -1,4 +1,7 @@
+import logging
 from pathlib import Path
+from time import perf_counter
+from uuid import uuid4
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -16,6 +19,7 @@ from config import obter_origens_cors
 
 BASE_DIR = Path(__file__).resolve().parent
 MEDIA_DIR = BASE_DIR / "media"
+LOGGER = logging.getLogger("uvicorn.error")
 
 app = FastAPI()
 
@@ -43,7 +47,65 @@ app.add_middleware(
     allow_headers=[
         "Content-Type",
     ],
+    expose_headers=[
+        "Server-Timing",
+        "X-Request-ID",
+    ],
 )
+
+
+@app.middleware("http")
+async def adicionar_observabilidade(
+    request: Request,
+    call_next,
+):
+    request_id = uuid4().hex
+    inicio = perf_counter()
+
+    try:
+        resposta = await call_next(request)
+    except Exception:
+        duracao_ms = (
+            perf_counter() - inicio
+        ) * 1000
+
+        LOGGER.exception(
+            "request_failed request_id=%s "
+            "method=%s path=%s duration_ms=%.1f",
+            request_id,
+            request.method,
+            request.url.path,
+            duracao_ms,
+        )
+        raise
+
+    duracao_ms = (
+        perf_counter() - inicio
+    ) * 1000
+
+    resposta.headers[
+        "X-Request-ID"
+    ] = request_id
+    resposta.headers[
+        "Server-Timing"
+    ] = f"app;dur={duracao_ms:.1f}"
+
+    if request.url.path in {
+        "/analise-foto",
+        "/analise-texto",
+    }:
+        LOGGER.info(
+            "request_completed request_id=%s "
+            "method=%s path=%s status=%s "
+            "duration_ms=%.1f",
+            request_id,
+            request.method,
+            request.url.path,
+            resposta.status_code,
+            duracao_ms,
+        )
+
+    return resposta
 
 # ========================================
 # TRATAMENTO GLOBAL DE ERROS             #
