@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 310" role="img" aria-labelledby="title desc">
+  <title id="title">Roteiro de teste da Lumina</title>
+  <desc id="desc">Fluxos de perfil manual, texto e fotografia chegando às recomendações do catálogo.</desc>
+  <rect width="900" height="310" rx="28" fill="#f1ede5"/>
+  <g font-family="Segoe UI,Arial">
+    <g transform="translate(38 48)"><rect width="195" height="58" rx="16" fill="#fffdf9" stroke="#d8d0c4"/><circle cx="30" cy="29" r="15" fill="#dfe8db"/><text x="30" y="34" text-anchor="middle" fill="#53644f" font-weight="700">1</text><text x="56" y="34" fill="#102033" font-size="14">Perfil manual</text></g>
+    <g transform="translate(38 126)"><rect width="195" height="58" rx="16" fill="#fffdf9" stroke="#d8d0c4"/><circle cx="30" cy="29" r="15" fill="#e3edf1"/><text x="30" y="34" text-anchor="middle" fill="#4f758a" font-weight="700">2</text><text x="56" y="34" fill="#102033" font-size="14">Descrição em texto</text></g>
+    <g transform="translate(38 204)"><rect width="195" height="58" rx="16" fill="#fffdf9" stroke="#d8d0c4"/><circle cx="30" cy="29" r="15" fill="#f2e4d4"/><text x="30" y="34" text-anchor="middle" fill="#9c6d43" font-weight="700">3</text><text x="56" y="34" fill="#102033" font-size="14">Fotografia</text></g>
+    <path d="M233 77H310M233 155H310M233 233H310" stroke="#8b978d" stroke-width="2"/>
+    <path d="M303 70l10 7-10 7M303 148l10 7-10 7M303 226l10 7-10 7" fill="none" stroke="#8b978d" stroke-width="2"/>
+    <g transform="translate(315 78)"><rect width="225" height="154" rx="22" fill="#102033"/><text x="112" y="49" text-anchor="middle" fill="#91a98b" font-size="11" letter-spacing="2">API FASTAPI</text><text x="112" y="84" text-anchor="middle" fill="#fff" font-family="Georgia,serif" font-size="22">Perfil estruturado</text><text x="112" y="112" text-anchor="middle" fill="#b6c2cb" font-size="12">Validação + regras</text></g>
+    <path d="M540 155H620" stroke="#8b978d" stroke-width="2"/><path d="M612 148l10 7-10 7" fill="none" stroke="#8b978d" stroke-width="2"/>
+    <g transform="translate(625 78)"><rect width="237" height="154" rx="22" fill="#fffdf9" stroke="#cfc7ba"/><text x="118" y="47" text-anchor="middle" fill="#b58355" font-size="11" letter-spacing="2">RESULTADO</text><text x="118" y="82" text-anchor="middle" fill="#102033" font-family="Georgia,serif" font-size="22">Rotina compatível</text><text x="118" y="111" text-anchor="middle" fill="#68716b" font-size="12">Produtos do catálogo</text><circle cx="90" cy="132" r="5" fill="#87977f"/><circle cx="118" cy="132" r="5" fill="#b58355"/><circle cx="146" cy="132" r="5" fill="#5f879b"/></g>
+  </g>
+</svg>

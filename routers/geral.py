@@ -1,9 +1,11 @@
 from fastapi import APIRouter
 
+from config import VERSAO_APLICACAO
+
 
 router = APIRouter(tags=["Geral"])
 
-STATUS_PROJETO = "Em desenvolvimento"
+STATUS_PROJETO = "operacional"
 NOME_PROJETO = "Análise de Pele para Loja de cosméticos"
 
 
@@ -17,4 +19,5 @@ def obter_status():
     return {
         "status": STATUS_PROJETO,
         "projeto": NOME_PROJETO,
+        "versao": VERSAO_APLICACAO,
     }

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 520" role="img" aria-labelledby="title desc">
+  <title id="title">Backend, frontend e painel rodando juntos</title>
+  <desc id="desc">Ilustração de uma janela do VS Code com três terminais e uma janela do navegador.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#edf1e9"/><stop offset="1" stop-color="#e9dfd1"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="14" stdDeviation="14" flood-color="#172738" flood-opacity=".13"/></filter>
+  </defs>
+  <rect width="760" height="520" rx="36" fill="url(#bg)"/>
+  <circle cx="675" cy="72" r="84" fill="none" stroke="#9bad92" stroke-opacity=".35"/>
+  <g filter="url(#shadow)">
+    <rect x="58" y="54" width="520" height="368" rx="18" fill="#132131"/>
+    <rect x="58" y="54" width="520" height="38" rx="18" fill="#1f3041"/>
+    <rect x="58" y="78" width="520" height="14" fill="#1f3041"/>
+    <circle cx="83" cy="73" r="5" fill="#d87167"/><circle cx="100" cy="73" r="5" fill="#d8a75e"/><circle cx="117" cy="73" r="5" fill="#7fa27c"/>
+    <text x="145" y="77" fill="#b9c5cf" font-family="Segoe UI,Arial" font-size="11">analise-pele-V3 — Visual Studio Code</text>
+    <rect x="75" y="111" width="145" height="286" rx="8" fill="#182838"/>
+    <text x="91" y="136" fill="#8ea0ae" font-family="Consolas,monospace" font-size="10">EXPLORER</text>
+    <g fill="#dce5ea" font-family="Consolas,monospace" font-size="11">
+      <text x="91" y="166">▾ admin</text><text x="91" y="192">▾ frontend</text><text x="91" y="218">▾ routers</text><text x="91" y="244">  main.py</text><text x="91" y="270">  .env</text><text x="91" y="296">  README.md</text>
+    </g>
+    <g transform="translate(237 111)">
+      <rect width="323" height="82" rx="8" fill="#0c1723" stroke="#31465a"/>
+      <circle cx="17" cy="17" r="5" fill="#8fa584"/><text x="30" y="21" fill="#94a7b5" font-family="Segoe UI,Arial" font-size="10">BACKEND</text>
+      <text x="16" y="48" fill="#e5edf1" font-family="Consolas,monospace" font-size="10">uvicorn main:app --reload</text>
+      <text x="16" y="67" fill="#94c89a" font-family="Consolas,monospace" font-size="9">Uvicorn running on http://127.0.0.1:8000</text>
+    </g>
+    <g transform="translate(237 211)">
+      <rect width="323" height="82" rx="8" fill="#0c1723" stroke="#31465a"/>
+      <circle cx="17" cy="17" r="5" fill="#b99066"/><text x="30" y="21" fill="#94a7b5" font-family="Segoe UI,Arial" font-size="10">FRONTEND</text>
+      <text x="16" y="48" fill="#e5edf1" font-family="Consolas,monospace" font-size="10">npm run dev</text>
+      <text x="16" y="67" fill="#94c89a" font-family="Consolas,monospace" font-size="9">Local: http://localhost:5173/</text>
+    </g>
+    <g transform="translate(237 311)">
+      <rect width="323" height="82" rx="8" fill="#0c1723" stroke="#31465a"/>
+      <circle cx="17" cy="17" r="5" fill="#7596a9"/><text x="30" y="21" fill="#94a7b5" font-family="Segoe UI,Arial" font-size="10">PAINEL</text>
+      <text x="16" y="48" fill="#e5edf1" font-family="Consolas,monospace" font-size="10">npm run dev</text>
+      <text x="16" y="67" fill="#94c89a" font-family="Consolas,monospace" font-size="9">Local: http://localhost:5174/</text>
+    </g>
+  </g>
+  <g filter="url(#shadow)" transform="translate(470 287)">
+    <rect width="242" height="172" rx="17" fill="#fffdf9"/>
+    <rect width="242" height="28" rx="17" fill="#e9e4da"/><rect y="18" width="242" height="10" fill="#e9e4da"/>
+    <circle cx="17" cy="14" r="4" fill="#9aae91"/><circle cx="31" cy="14" r="4" fill="#c4a376"/>
+    <rect x="18" y="46" width="206" height="102" rx="12" fill="#f4f0e8"/>
+    <text x="34" y="72" fill="#a27650" font-family="Segoe UI,Arial" font-size="8" letter-spacing="2">LUMINA SKIN</text>
+    <text x="34" y="99" fill="#102033" font-family="Georgia,serif" font-size="19">Conheça melhor</text><text x="34" y="121" fill="#7e9177" font-family="Georgia,serif" font-size="19" font-style="italic">sua pele.</text>
+    <rect x="34" y="132" width="82" height="8" rx="4" fill="#102033"/>
+  </g>
+  <path d="M581 220c54 5 83 30 87 62" fill="none" stroke="#7f9379" stroke-width="2" stroke-dasharray="5 6"/>
+  <circle cx="581" cy="220" r="5" fill="#7f9379"/>
+</svg>

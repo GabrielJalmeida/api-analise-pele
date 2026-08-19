@@ -2,17 +2,14 @@ import re
 import unicodedata
 
 from io import BytesIO
-from pathlib import Path
 from uuid import uuid4
 
 from PIL import Image, ImageOps, UnidentifiedImageError
+from config import obter_diretorio_media
 
-
-BASE_DIR = Path(__file__).resolve().parent
 
 MEDIA_PRODUTOS_DIR = (
-    BASE_DIR
-    / "media"
+    obter_diretorio_media()
     / "produtos"
 )
 
@@ -178,12 +175,11 @@ def remover_imagem_produto(
         return
 
     caminho_relativo = imagem_url.removeprefix(
-        "/media/"
+        prefixo
     )
 
     caminho = (
-        BASE_DIR
-        / "media"
+        MEDIA_PRODUTOS_DIR
         / caminho_relativo
     ).resolve()
 

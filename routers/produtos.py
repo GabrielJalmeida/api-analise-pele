@@ -7,10 +7,14 @@ from fastapi import (
     File,
     Form,
     HTTPException,
+    Query,
+    Response,
     UploadFile,
 )
 
-from config import ambiente_producao
+from admin_security import (
+    bloquear_escrita_administrativa_em_producao,
+)
 from database import gerenciar_banco, gerenciar_transacao
 from models import (
     AtualizarProduto,
@@ -23,19 +27,12 @@ from services import produto_para_dict
 from product_image_service import (
     ImagemProdutoInvalida,
     TAMANHO_MAXIMO_BYTES,
+    remover_imagem_produto,
     salvar_imagem_produto,
 )
 
 
 router = APIRouter(tags=["Produtos"])
-
-
-def bloquear_escrita_administrativa_em_producao():
-    if ambiente_producao():
-        raise HTTPException(
-            status_code=404,
-            detail="Rota não disponível neste ambiente",
-        )
 
 @router.post(
     "/produtos/imagem",
@@ -102,6 +99,40 @@ async def enviar_imagem_produto(
         "status": "imagem_salva",
         "imagem_url": imagem_url,
     }
+
+
+@router.delete(
+    "/produtos/imagem",
+    status_code=204,
+    dependencies=[
+        Depends(
+            bloquear_escrita_administrativa_em_producao
+        )
+    ],
+)
+def excluir_imagem_produto_nao_utilizada(
+    imagem_url: str = Query(
+        min_length=1,
+        max_length=500,
+    ),
+):
+    with gerenciar_banco() as (_, cursor):
+        cursor.execute(
+            "SELECT id FROM produtos WHERE imagem_url = ?",
+            (imagem_url,),
+        )
+
+        if cursor.fetchone() is not None:
+            raise HTTPException(
+                status_code=409,
+                detail=(
+                    "A imagem está vinculada a um produto "
+                    "e não pode ser removida isoladamente"
+                ),
+            )
+
+    remover_imagem_produto(imagem_url)
+    return Response(status_code=204)
 
 @router.get(
     "/produto/{id_produto}",
@@ -313,6 +344,8 @@ def atualizar_produto(
 
     valores_sql.append(id_produto)
 
+    imagem_anterior = None
+
     try:
         with gerenciar_transacao() as (conexao, cursor):
             cursor.execute(
@@ -327,6 +360,8 @@ def atualizar_produto(
                     status_code=404,
                     detail="Produto não encontrado",
                 )
+
+            imagem_anterior = produto["imagem_url"]
 
             cursor.execute(sql, valores_sql)
 
@@ -353,6 +388,18 @@ def atualizar_produto(
                 "Os dados do produto violam "
                 "uma regra do banco de dados"
             ),
+        )
+
+    imagem_nova = dados_atualizados.get(
+        "imagem_url"
+    )
+
+    if (
+        imagem_nova is not None
+        and imagem_nova != imagem_anterior
+    ):
+        remover_imagem_produto(
+            imagem_anterior
         )
 
     return produto_para_dict(produto_atualizado)

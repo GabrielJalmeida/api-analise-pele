@@ -1,5 +1,7 @@
+import asyncio
 import logging
-from pathlib import Path
+from contextlib import asynccontextmanager
+from contextlib import suppress
 from time import perf_counter
 from uuid import uuid4
 
@@ -13,15 +15,57 @@ from routers.analise import router as router_analise
 from routers.geral import router as router_geral
 from routers.produtos import router as router_produtos
 from routers.recomendacoes import router as router_recomendacoes
+from routers.importacao import router as router_importacao
+from routers.pedidos import router as router_pedidos
 
 from ai_service import LimiteIAExcedido, ServicoIAIndisponivel, RespostaIAInvalida, ConfiguracaoIAInvalida
-from config import obter_origens_cors
+from config import (
+    VERSAO_APLICACAO,
+    obter_diretorio_media,
+    obter_origens_cors,
+)
+from criar_banco import criar_tabelas
+from order_service import limpar_pedidos_expirados
 
-BASE_DIR = Path(__file__).resolve().parent
-MEDIA_DIR = BASE_DIR / "media"
+MEDIA_DIR = obter_diretorio_media()
+MEDIA_DIR.mkdir(parents=True, exist_ok=True)
 LOGGER = logging.getLogger("uvicorn.error")
 
-app = FastAPI()
+
+@asynccontextmanager
+async def ciclo_de_vida(app: FastAPI):
+    criar_tabelas(silencioso=True)
+    limpar_pedidos_expirados()
+
+    async def limpar_historico_periodicamente():
+        while True:
+            await asyncio.sleep(24 * 60 * 60)
+            await asyncio.to_thread(
+                limpar_pedidos_expirados
+            )
+
+    tarefa_limpeza = asyncio.create_task(
+        limpar_historico_periodicamente()
+    )
+
+    try:
+        yield
+    finally:
+        tarefa_limpeza.cancel()
+
+        with suppress(asyncio.CancelledError):
+            await tarefa_limpeza
+
+
+app = FastAPI(
+    title="API de Análise de Pele",
+    version=VERSAO_APLICACAO,
+    description=(
+        "Análise cosmética assistida por IA, recomendações "
+        "determinísticas e catálogo administrável."
+    ),
+    lifespan=ciclo_de_vida,
+)
 
 app.mount(
     "/media",
@@ -33,6 +77,8 @@ app.include_router(router_geral)
 app.include_router(router_produtos)
 app.include_router(router_recomendacoes)
 app.include_router(router_analise)
+app.include_router(router_importacao)
+app.include_router(router_pedidos)
 
 app.add_middleware(
     CORSMiddleware,
@@ -46,10 +92,12 @@ app.add_middleware(
     ],
     allow_headers=[
         "Content-Type",
+        "X-Cliente-Token",
     ],
     expose_headers=[
         "Server-Timing",
         "X-Request-ID",
+        "X-Cliente-Token",
     ],
 )
 

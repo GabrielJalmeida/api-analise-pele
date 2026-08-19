@@ -16,6 +16,7 @@ import {
   desativarProduto,
   ErroApi,
   reativarProduto,
+  aguardarApiDisponivel,
 } from './services/api'
 
 import type {
@@ -24,13 +25,19 @@ import type {
   Produto,
 } from './types/produto'
 
+import BulkImport from './components/BulkImport'
+import OrderHistory from './components/OrderHistory'
 import ProductFilters from './components/ProductFilters'
 import ProductForm from './components/ProductForm'
 import ProductTable from './components/ProductTable'
 
 import './App.css'
 
+
 const { Sider, Content } = Layout
+
+type SecaoPainel = 'produtos' | 'importar' | 'pedidos'
+
 
 function obterMensagemErro(
   erro: unknown,
@@ -47,54 +54,37 @@ function obterMensagemErro(
   return mensagemPadrao
 }
 
+
 function App() {
   const [messageApi, contextHolder] = message.useMessage()
-
+  const [secao, setSecao] =
+    useState<SecaoPainel>('produtos')
   const [drawerAberto, setDrawerAberto] =
     useState(false)
-
   const [produtoEmEdicao, setProdutoEmEdicao] =
     useState<Produto | null>(null)
-
   const [salvandoProduto, setSalvandoProduto] =
     useState(false)
-
-  const [
-    produtoAlterandoStatus,
-    setProdutoAlterandoStatus,
-  ] = useState<number | null>(null)
-
+  const [produtoAlterandoStatus, setProdutoAlterandoStatus] =
+    useState<number | null>(null)
   const [produtos, setProdutos] =
     useState<Produto[]>([])
-
-  const [
-    carregandoProdutos,
-    setCarregandoProdutos,
-  ] = useState(true)
-
+  const [carregandoProdutos, setCarregandoProdutos] =
+    useState(true)
   const [erroProdutos, setErroProdutos] =
     useState<string | null>(null)
-
   const [filtrosAtuais, setFiltrosAtuais] =
-    useState<FiltrosProdutos>({
-      ativo: true,
-    })
+    useState<FiltrosProdutos>({ ativo: true })
 
   async function carregarProdutos(
-    filtros: FiltrosProdutos = {},
+    filtros: FiltrosProdutos = filtrosAtuais,
   ) {
     try {
       setCarregandoProdutos(true)
       setErroProdutos(null)
-
-      const produtosEncontrados =
-        await buscarProdutos(filtros)
-
-      setProdutos(produtosEncontrados)
+      setProdutos(await buscarProdutos(filtros))
     } catch {
-      setErroProdutos(
-        'Não foi possível carregar os produtos.',
-      )
+      setErroProdutos('Não foi possível carregar os produtos.')
     } finally {
       setCarregandoProdutos(false)
     }
@@ -103,102 +93,71 @@ function App() {
   useEffect(() => {
     let ignorar = false
 
-    async function carregarProdutosIniciais() {
-      try {
-        const produtosEncontrados =
-          await buscarProdutos({
-            ativo: true,
-          })
-
+    aguardarApiDisponivel()
+      .then(() => buscarProdutos({ ativo: true }))
+      .then((encontrados) => {
         if (!ignorar) {
-          setProdutos(produtosEncontrados)
+          setProdutos(encontrados)
         }
-      } catch {
+      })
+      .catch(() => {
         if (!ignorar) {
-          setErroProdutos(
-            'Não foi possível carregar os produtos.',
-          )
+          setErroProdutos('Não foi possível carregar os produtos.')
         }
-      } finally {
+      })
+      .finally(() => {
         if (!ignorar) {
           setCarregandoProdutos(false)
         }
-      }
-    }
-
-    carregarProdutosIniciais()
+      })
 
     return () => {
       ignorar = true
     }
   }, [])
 
-  function aplicarFiltros(
-    filtros: FiltrosProdutos,
-  ) {
+  function aplicarFiltros(filtros: FiltrosProdutos) {
     setFiltrosAtuais(filtros)
-
     carregarProdutos(filtros)
   }
 
-  async function salvarProduto(
-    dadosProduto: NovoProduto,
-  ) {
-    const estaEditando =
-      produtoEmEdicao !== null
+  async function salvarProduto(dadosProduto: NovoProduto) {
+    const estaEditando = produtoEmEdicao !== null
 
     try {
       setSalvandoProduto(true)
 
       if (produtoEmEdicao) {
-        await atualizarProduto(
-          produtoEmEdicao.id,
-          dadosProduto,
-        )
+        await atualizarProduto(produtoEmEdicao.id, dadosProduto)
       } else {
         await criarProduto(dadosProduto)
       }
 
-      await carregarProdutos(filtrosAtuais)
-
+      await carregarProdutos()
       setDrawerAberto(false)
       setProdutoEmEdicao(null)
-
-      if (estaEditando) {
-        messageApi.success(
-          'Produto atualizado com sucesso.',
-        )
-      } else {
-        messageApi.success(
-          'Produto cadastrado com sucesso.',
-        )
-      }
+      messageApi.success(
+        estaEditando
+          ? 'Produto atualizado com sucesso.'
+          : 'Produto cadastrado com sucesso.',
+      )
     } catch (erro) {
-      const mensagemPadrao = estaEditando
-        ? 'Não foi possível atualizar o produto.'
-        : 'Não foi possível cadastrar o produto.'
-
       messageApi.error(
         obterMensagemErro(
           erro,
-          mensagemPadrao,
+          estaEditando
+            ? 'Não foi possível atualizar o produto.'
+            : 'Não foi possível cadastrar o produto.',
         ),
       )
+
+      throw erro
     } finally {
       setSalvandoProduto(false)
     }
   }
 
-  function editarProduto(
-    produto: Produto,
-  ) {
-    setProdutoEmEdicao(produto)
-    setDrawerAberto(true)
-  }
-
-  async function alterarStatusProduto(
-    produto: Produto,
-  ) {
+  async function alterarStatusProduto(produto: Produto) {
     try {
       setProdutoAlterandoStatus(produto.id)
 
@@ -208,26 +167,17 @@ function App() {
         await reativarProduto(produto.id)
       }
 
-      await carregarProdutos(filtrosAtuais)
-
-      if (produto.ativo) {
-        messageApi.success(
-          'Produto desativado com sucesso.',
-        )
-      } else {
-        messageApi.success(
-          'Produto reativado com sucesso.',
-        )
-      }
+      await carregarProdutos()
+      messageApi.success(
+        produto.ativo
+          ? 'Produto desativado com sucesso.'
+          : 'Produto reativado com sucesso.',
+      )
     } catch (erro) {
-      const mensagemPadrao = produto.ativo
-        ? 'Não foi possível desativar o produto.'
-        : 'Não foi possível reativar o produto.'
-
       messageApi.error(
         obterMensagemErro(
           erro,
-          mensagemPadrao,
+          'Não foi possível alterar o produto.',
         ),
       )
     } finally {
@@ -235,115 +185,116 @@ function App() {
     }
   }
 
+  function abrirNovoProduto() {
+    setProdutoEmEdicao(null)
+    setDrawerAberto(true)
+  }
+
+  function conteudoProdutos() {
+    return (
+      <>
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">Produtos</h1>
+            <p className="page-description">
+              Gerencie os itens usados pelas recomendações da API.
+            </p>
+          </div>
+          <div className="page-actions">
+            <Button onClick={() => setSecao('importar')}>
+              Importar vários
+            </Button>
+            <Button type="primary" onClick={abrirNovoProduto}>
+              Novo produto
+            </Button>
+          </div>
+        </div>
+
+        <div className="products-panel">
+          <div className="products-toolbar">
+            <div className="products-count">
+              <strong>{produtos.length}</strong>
+              <span>
+                {produtos.length === 1
+                  ? 'produto encontrado'
+                  : 'produtos encontrados'}
+              </span>
+            </div>
+            <ProductFilters onFiltrar={aplicarFiltros} />
+          </div>
+
+          {erroProdutos && (
+            <div className="products-alert">
+              <Alert type="error" title={erroProdutos} showIcon />
+            </div>
+          )}
+
+          <ProductTable
+            produtos={produtos}
+            carregando={carregandoProdutos}
+            produtoAlterandoStatus={produtoAlterandoStatus}
+            onEditar={(produto) => {
+              setProdutoEmEdicao(produto)
+              setDrawerAberto(true)
+            }}
+            onAlterarStatus={alterarStatusProduto}
+          />
+        </div>
+      </>
+    )
+  }
+
   return (
     <Layout className="app-layout">
       {contextHolder}
 
       <Sider
-        width={220}
-        breakpoint='md'
+        width={232}
+        breakpoint="md"
         collapsedWidth={0}
         className="app-sider"
       >
         <div className="app-brand">
-          <div className="app-brand-mark">
-            S
-          </div>
-
+          <div className="app-brand-mark">S</div>
           <div className="app-brand-copy">
-            <strong className="app-brand-name">
-              Skin Admin
-            </strong>
-
-            <span className="app-brand-subtitle">
-              Gestão de catálogo
-            </span>
+            <strong className="app-brand-name">Skin Admin</strong>
+            <span className="app-brand-subtitle">Versão 4 · painel web</span>
           </div>
         </div>
 
         <Menu
           theme="dark"
           mode="inline"
-          defaultSelectedKeys={['produtos']}
+          selectedKeys={[secao]}
+          onClick={({ key }) => setSecao(key as SecaoPainel)}
           items={[
-            {
-              key: 'produtos',
-              label: 'Produtos',
-            },
+            { key: 'produtos', label: 'Produtos' },
+            { key: 'importar', label: 'Importar catálogo' },
+            { key: 'pedidos', label: 'Pedidos' },
           ]}
         />
+
+        <div className="app-local-note">
+          O painel usa a API definida em VITE_API_URL. As chaves de IA ficam somente no backend.
+        </div>
       </Sider>
 
       <Layout>
-
         <Content className="app-content">
-          <div className="page-header">
-            <div>
-              <h1 className="page-title">
-                Produtos
-              </h1>
-
-              <p className="page-description">
-                Gerencie os produtos disponíveis no catálogo.
-              </p>
-            </div>
-
-            <Button
-              type="primary"
-              onClick={() => {
-                setProdutoEmEdicao(null)
-                setDrawerAberto(true)
+          {secao === 'produtos' && conteudoProdutos()}
+          {secao === 'importar' && (
+            <BulkImport
+              onConcluido={async () => {
+                await carregarProdutos()
+                messageApi.success('Catálogo atualizado.')
               }}
-            >
-              Novo produto
-            </Button>
-          </div>
-
-          <div className="products-panel">
-            <div className="products-toolbar">
-              <div className="products-count">
-                <strong>{produtos.length}</strong>
-
-                <span>
-                  {produtos.length === 1
-                    ? 'produto encontrado'
-                    : 'produtos encontrados'}
-                </span>
-              </div>
-
-              <ProductFilters
-                onFiltrar={aplicarFiltros}
-              />
-            </div>
-
-            {erroProdutos && (
-              <div className="products-alert">
-                <Alert
-                  type="error"
-                  title={erroProdutos}
-                  showIcon
-                />
-              </div>
-            )}
-
-            <ProductTable
-              produtos={produtos}
-              carregando={carregandoProdutos}
-              produtoAlterandoStatus={
-                produtoAlterandoStatus
-              }
-              onEditar={editarProduto}
-              onAlterarStatus={alterarStatusProduto}
             />
-          </div>
+          )}
+          {secao === 'pedidos' && <OrderHistory />}
         </Content>
 
         <Drawer
-          title={
-            produtoEmEdicao
-              ? 'Editar produto'
-              : 'Novo produto'
-          }
+          title={produtoEmEdicao ? 'Editar produto' : 'Novo produto'}
           open={drawerAberto}
           onClose={() => {
             setProdutoEmEdicao(null)

@@ -37,6 +37,7 @@ def test_api_inicia_e_rotas_sem_ia_funcionam_sem_chave(client, monkeypatch):
 
     assert resposta.status_code == 200
     assert resposta.json()["projeto"] == "Análise de Pele para Loja de cosméticos"
+    assert resposta.json()["versao"] == "4.0.0"
 
 
 def test_rota_de_ia_sem_chave_retorna_indisponibilidade(client, monkeypatch):

@@ -1,3 +1,5 @@
+import asyncio
+
 from io import BytesIO
 
 from fastapi import (
@@ -252,6 +254,7 @@ async def analisar_foto(
     conteudo = await arquivo.read(
         TAMANHO_MAXIMO_IMAGEM + 1
     )
+    await arquivo.close()
 
     if (
         len(conteudo)
@@ -341,13 +344,25 @@ async def analisar_foto(
         )
     )
 
-    resultado_foto = (
-        await run_in_threadpool(
-            interpretar_foto,
-            conteudo_sanitizado,
-            mime_type_real,
-        )
+    tarefa_foto = run_in_threadpool(
+        interpretar_foto,
+        conteudo_sanitizado,
+        mime_type_real,
     )
+
+    if texto_limpo:
+        resultado_foto, resultado_texto = (
+            await asyncio.gather(
+                tarefa_foto,
+                run_in_threadpool(
+                    interpretar_perfil,
+                    texto_limpo,
+                ),
+            )
+        )
+    else:
+        resultado_foto = await tarefa_foto
+        resultado_texto = None
 
     if not resultado_foto.imagem_adequada:
         return {
@@ -361,16 +376,7 @@ async def analisar_foto(
                 resultado_foto.model_dump(),
         }
 
-    resultado_texto = None
-
-    if texto_limpo:
-        resultado_texto = (
-            await run_in_threadpool(
-                interpretar_perfil,
-                texto_limpo,
-            )
-        )
-
+    if resultado_texto:
         if (
             not resultado_texto
             .entrada_valida

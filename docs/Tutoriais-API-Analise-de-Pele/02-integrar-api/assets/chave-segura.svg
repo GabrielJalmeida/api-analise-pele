@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 300" role="img" aria-labelledby="title desc">
+  <title id="title">A chave de IA fica somente no backend</title>
+  <desc id="desc">O navegador conhece apenas o endereço da API. A chave fica protegida no servidor.</desc>
+  <rect width="860" height="300" rx="28" fill="#eef2f1"/>
+  <g font-family="Segoe UI,Arial">
+    <g transform="translate(38 58)"><rect width="220" height="184" rx="22" fill="#fff" stroke="#d5dddd"/><text x="110" y="38" text-anchor="middle" fill="#5f879b" font-size="10" letter-spacing="2">NAVEGADOR</text><rect x="25" y="60" width="170" height="40" rx="11" fill="#edf2f3"/><text x="36" y="85" fill="#345a6e" font-family="Consolas,monospace" font-size="10">VITE_API_URL=https://...</text><path d="M54 132h112" stroke="#9aa9ad" stroke-width="2"/><text x="110" y="158" text-anchor="middle" fill="#758080" font-size="11">Sem chave de IA</text></g>
+    <path d="M258 150H339" stroke="#66899a" stroke-width="3"/><path d="M329 141l13 9-13 9" fill="none" stroke="#66899a" stroke-width="3"/>
+    <g transform="translate(345 40)"><rect width="245" height="220" rx="24" fill="#102033"/><text x="122" y="37" text-anchor="middle" fill="#93afbc" font-size="10" letter-spacing="2">BACKEND</text><rect x="27" y="58" width="191" height="113" rx="13" fill="#182d40"/><text x="42" y="85" fill="#bdcbd3" font-family="Consolas,monospace" font-size="10">.env</text><text x="42" y="112" fill="#fff" font-family="Consolas,monospace" font-size="10">AI_PROVIDER=gemini</text><text x="42" y="136" fill="#fff" font-family="Consolas,monospace" font-size="10">GEMINI_API_KEY=••••••</text><circle cx="122" cy="194" r="15" fill="#7f9a78"/><path d="M116 195l5 5 9-12" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/></g>
+    <path d="M590 150H667" stroke="#66899a" stroke-width="3"/><path d="M657 141l13 9-13 9" fill="none" stroke="#66899a" stroke-width="3"/>
+    <g transform="translate(673 69)"><rect width="150" height="162" rx="22" fill="#fff" stroke="#d5dddd"/><circle cx="75" cy="58" r="30" fill="#f0e7dd"/><path d="M66 58a9 9 0 1118 0v7H66z" fill="none" stroke="#9d714f" stroke-width="3"/><rect x="62" y="63" width="26" height="20" rx="5" fill="#9d714f"/><text x="75" y="119" text-anchor="middle" fill="#102033" font-family="Georgia,serif" font-size="17">Provedor de IA</text><text x="75" y="140" text-anchor="middle" fill="#758080" font-size="10">Chave protegida</text></g>
+  </g>
+</svg>

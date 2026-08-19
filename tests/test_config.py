@@ -1,6 +1,7 @@
 from config import (
     ambiente_producao,
     obter_caminho_banco,
+    obter_diretorio_media,
     obter_origens_cors,
 )
 
@@ -38,6 +39,7 @@ def test_cors_usa_origem_padrao(
 
     assert origens == [
         "http://localhost:5173",
+        "http://localhost:5174",
     ]
 
 

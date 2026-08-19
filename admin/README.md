@@ -1,105 +1,43 @@
-# Skin Admin
+# Skin Admin — Versão 4
 
-Painel administrativo do Sistema de Análise de Pele e Recomendação de Cosméticos.
-
-Esta interface é responsável pelo gerenciamento do catálogo de produtos utilizado pela API.
-
-## Tecnologias
-
-- React
-- TypeScript
-- Vite
-- Ant Design
-- ESLint
+Painel React/Vite que administra uma instância da API FastAPI pelo navegador.
 
 ## Funcionalidades
 
-O painel permite:
+- cadastro, edição, busca, ativação e desativação de produtos;
+- upload e substituição de imagens processadas pelo backend;
+- importação com prévia por CSV/XLSX;
+- organização de texto por IA quando o backend possui credencial;
+- política para ignorar ou atualizar produtos duplicados;
+- consulta de pedidos demonstrativos.
 
-- cadastrar produtos;
-- editar produtos;
-- pesquisar produtos por nome;
-- filtrar por categoria;
-- filtrar por tipo de pele;
-- visualizar produtos ativos e inativos;
-- desativar produtos;
-- reativar produtos;
-- acompanhar preço e estoque.
+## Executar
 
-A desativação utiliza soft delete. O produto continua registrado no banco de dados, mas deixa de participar das recomendações enquanto estiver inativo.
-
-## Comunicação com a API
-
-O painel não acessa o banco SQLite diretamente.
-
-O fluxo é:
-
-```text
-React
-  ↓ HTTP/JSON
-FastAPI
-  ↓
-SQLite
-```
-
-O endereço da API é configurado através da variável:
-
-```env
-VITE_API_URL=http://127.0.0.1:8000
-```
-
-## Configuração
-
-Instale as dependências:
+Primeiro inicie a API na raiz do repositório. Depois:
 
 ```powershell
 npm install
+Copy-Item .env.example .env
+npm run dev
 ```
 
-Crie o arquivo local de ambiente:
-
-```powershell
-copy .env.example .env
-```
-
-O arquivo `.env.example` possui a configuração padrão:
+Configure a URL da API em `.env`:
 
 ```env
 VITE_API_URL=http://127.0.0.1:8000
 ```
 
-O `.env` local não deve ser enviado para o GitHub.
+As credenciais e os modelos de IA pertencem ao backend e devem ser definidos no `.env` da raiz. Nenhuma chave é armazenada no bundle do painel.
 
-## Desenvolvimento
-
-Com a API FastAPI em execução, inicie o painel:
-
-```powershell
-npm run dev
-```
-
-Por padrão:
-
-```text
-http://localhost:5173
-```
-
-## Validação
-
-Executar o lint:
+## Validar
 
 ```powershell
 npm run lint
-```
-
-Gerar o build de produção:
-
-```powershell
 npm run build
 ```
 
 ## Segurança
 
-O painel administrativo foi desenvolvido inicialmente para utilização controlada durante o desenvolvimento do projeto.
+Com `APP_ENV=production`, a API oculta as operações administrativas. O painel atual é destinado ao uso local com `APP_ENV=development`.
 
-Antes da exposição pública das operações administrativas, deverá ser implementado um mecanismo de autenticação e autorização.
+Não publique este painel sem implementar autenticação, autorização e auditoria no backend. CORS, sozinho, não é controle de acesso.

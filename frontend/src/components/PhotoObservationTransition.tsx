@@ -110,8 +110,8 @@ function PhotoObservationTransition({
       observacoes.length
     ) {
       const tempo = reduzirMovimento
-        ? 300
-        : 850
+        ? 220
+        : 650
 
       const temporizador =
         window.setTimeout(() => {
@@ -132,7 +132,7 @@ function PhotoObservationTransition({
         onConcluir,
         reduzirMovimento
           ? 100
-          : 400,
+          : 250,
       )
 
     return () => {
@@ -242,6 +242,14 @@ function PhotoObservationTransition({
           A leitura considera apenas o que é
           visualmente observável nesta imagem.
         </p>
+
+        <button
+          type="button"
+          onClick={onConcluir}
+          className="mt-6 text-xs text-[#777d75] underline decoration-[#b8b0a5] underline-offset-4 transition-colors hover:text-[#0d1b2a]"
+        >
+          Ver resultado agora
+        </button>
       </motion.div>
     </section>
   )

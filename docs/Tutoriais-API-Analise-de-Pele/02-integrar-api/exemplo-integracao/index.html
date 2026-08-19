@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Exemplo de integração — Análise de Pele</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a href="../index.html">← Voltar ao tutorial</a>
+    <span>Exemplo adaptável • HTML, CSS e JavaScript</span>
+  </header>
+
+  <main>
+    <section class="intro">
+      <div>
+        <span class="eyebrow">Laboratório de integração</span>
+        <h1>Converse com a API <em>sem usar o frontend Lumina.</em></h1>
+        <p>Esta página demonstra as três entradas públicas. Abra o código no VS Code, altere o visual e reutilize somente o que fizer sentido no seu sistema.</p>
+      </div>
+      <div class="api-config">
+        <label for="api-url">Endereço da API</label>
+        <div class="input-row">
+          <input id="api-url" type="url" value="http://127.0.0.1:8000" spellcheck="false">
+          <button id="save-api" type="button">Salvar</button>
+        </div>
+        <button class="status-button" id="test-status" type="button"><span class="status-dot"></span> Testar conexão</button>
+        <p id="connection-message" aria-live="polite">Use a API local ou informe seu endereço HTTPS.</p>
+      </div>
+    </section>
+
+    <div class="file-alert" id="file-alert" hidden>
+      Você abriu o exemplo como arquivo. Para chamadas reais, use <code>python -m http.server 5500</code> nesta pasta e acesse <code>http://localhost:5500</code>.
+    </div>
+
+    <section class="workspace">
+      <div class="input-panel">
+        <div class="mode-tabs" role="tablist" aria-label="Tipo de análise">
+          <button class="mode active" data-panel="manual" type="button">Perfil manual</button>
+          <button class="mode" data-panel="texto" type="button">Por texto</button>
+          <button class="mode" data-panel="foto" type="button">Por foto</button>
+        </div>
+
+        <form class="analysis-form active" id="form-manual" data-form="manual">
+          <span class="form-number">01</span>
+          <h2>Já sei meu perfil</h2>
+          <p>Não usa IA. É a melhor forma de conferir primeiro se frontend, API, banco e recomendações estão conectados.</p>
+          <label>Tipo de pele
+            <select name="tipo_pele">
+              <option value="oleosa">Oleosa</option>
+              <option value="seca">Seca</option>
+              <option value="mista">Mista</option>
+              <option value="normal">Normal</option>
+            </select>
+          </label>
+          <div class="checks">
+            <label><input type="checkbox" name="sensivel"> Pele sensível</label>
+            <label><input type="checkbox" name="tem_espinha"> Tem espinhas</label>
+          </div>
+          <button class="primary" type="submit">Buscar recomendações</button>
+        </form>
+
+        <form class="analysis-form" id="form-texto" data-form="texto" hidden>
+          <span class="form-number">02</span>
+          <h2>Descrever minha pele</h2>
+          <p>Usa o provedor de IA configurado no backend. Escreva como a pele se comporta durante o dia.</p>
+          <label>Descrição
+            <textarea name="texto" minlength="10" maxlength="1000" required placeholder="Ex.: Minha testa e meu nariz ficam oleosos durante o dia, mas minhas bochechas às vezes ressecam."></textarea>
+          </label>
+          <button class="primary" type="submit">Analisar descrição</button>
+        </form>
+
+        <form class="analysis-form" id="form-foto" data-form="foto" hidden>
+          <span class="form-number">03</span>
+          <h2>Analisar uma fotografia</h2>
+          <p>A foto pode mostrar o rosto ou uma região facial clara. O texto complementar é opcional.</p>
+          <label>Imagem JPG, PNG ou WEBP
+            <input name="arquivo" type="file" accept="image/jpeg,image/png,image/webp" required>
+          </label>
+          <label>Descrição complementar (opcional)
+            <textarea name="texto" minlength="10" maxlength="1000" placeholder="Ex.: Esta região costuma ficar oleosa no fim do dia."></textarea>
+          </label>
+          <button class="primary" type="submit">Analisar fotografia</button>
+        </form>
+      </div>
+
+      <section class="result-panel" aria-live="polite" aria-busy="false">
+        <div class="result-empty" id="result-empty">
+          <span class="orb">↗</span>
+          <h2>A resposta aparecerá aqui.</h2>
+          <p>Comece pelo perfil manual. Depois teste as rotas que dependem de IA.</p>
+        </div>
+        <div id="loading" class="loading" hidden><span></span><p>Enviando dados e aguardando a API…</p></div>
+        <div id="result" hidden></div>
+      </section>
+    </section>
+
+    <section class="learning-note">
+      <div><span>O que observar no código</span><h2>Interface, requisição e apresentação são camadas diferentes.</h2></div>
+      <ol><li><code>index.html</code> cria os campos.</li><li><code>app.js</code> chama a API e interpreta o JSON.</li><li><code>styles.css</code> define a aparência.</li></ol>
+    </section>
+  </main>
+
+  <footer>Exemplo educacional • análise cosmética informativa • nenhuma chave de IA fica nesta página</footer>
+  <script src="app.js"></script>
+</body>
+</html>

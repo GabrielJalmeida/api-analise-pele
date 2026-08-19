@@ -66,3 +66,52 @@ export interface RespostaUploadImagemProduto {
   status: 'imagem_salva'
   imagem_url: string
 }
+
+export interface ErroImportacao {
+  linha: number
+  campo: string
+  mensagem: string
+}
+
+export interface PreviaImportacao {
+  status: 'previa_pronta'
+  origem: 'arquivo' | 'ia'
+  total_linhas: number
+  total_validos: number
+  total_erros: number
+  produtos: NovoProduto[]
+  erros: ErroImportacao[]
+}
+
+export interface ResultadoImportacao {
+  status: 'importacao_concluida'
+  criados: number
+  atualizados: number
+  ignorados: number
+}
+
+export type PoliticaDuplicados =
+  | 'ignorar'
+  | 'atualizar'
+
+export interface ItemPedido {
+  produto_id: number | null
+  nome_produto: string
+  marca: string
+  imagem_url: string
+  preco_unitario: number
+  quantidade: number
+  subtotal: number
+}
+
+export interface Pedido {
+  codigo: string
+  cliente_nome: string
+  cliente_email: string
+  total: number
+  status: 'registrado' | 'cancelado'
+  criado_em: string
+  expira_em: string
+  modo: 'demonstracao'
+  itens: ItemPedido[]
+}
