@@ -12,9 +12,20 @@ def conectar_banco():
         exist_ok=True,
     )
 
-    conexao = sqlite3.connect(CAMINHO_BANCO)
+    conexao = sqlite3.connect(
+        CAMINHO_BANCO,
+        timeout=10,
+    )
     conexao.row_factory = sqlite3.Row
     cursor = conexao.cursor()
+
+    cursor.execute(
+        "PRAGMA foreign_keys = ON"
+    )
+    cursor.execute(
+        "PRAGMA busy_timeout = 10000"
+    )
+
     return conexao, cursor
 
 @contextmanager
@@ -41,4 +52,3 @@ def gerenciar_transacao():
 
     finally:
         conexao.close()
-        

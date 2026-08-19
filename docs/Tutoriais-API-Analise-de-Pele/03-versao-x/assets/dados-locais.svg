@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 310" role="img" aria-labelledby="title desc">
+  <title id="title">Dados locais da Versão X</title>
+  <desc id="desc">O aplicativo Skin Admin se conecta à API, banco, imagens e configuração armazenados no computador.</desc>
+  <rect width="850" height="310" rx="28" fill="#f0e8e2"/>
+  <g font-family="Segoe UI,Arial">
+    <g transform="translate(45 63)"><rect width="210" height="184" rx="22" fill="#102033"/><text x="105" y="44" text-anchor="middle" fill="#c08d73" font-size="10" letter-spacing="2">APLICATIVO</text><rect x="36" y="68" width="138" height="74" rx="12" fill="#22384a"/><text x="105" y="98" text-anchor="middle" fill="#fff" font-family="Georgia,serif" font-size="18">Skin Admin</text><text x="105" y="120" text-anchor="middle" fill="#afbdc6" font-size="10">janela própria</text></g>
+    <path d="M255 155H334" stroke="#9a755f" stroke-width="3"/><path d="M326 147l11 8-11 8" fill="none" stroke="#9a755f" stroke-width="3"/>
+    <g transform="translate(340 63)"><rect width="170" height="184" rx="22" fill="#fffdf9" stroke="#d9cfc8"/><circle cx="85" cy="57" r="29" fill="#eee4dd"/><path d="M70 48h30M70 58h30M70 68h20" stroke="#875f4b" stroke-width="3" stroke-linecap="round"/><text x="85" y="112" text-anchor="middle" fill="#102033" font-family="Georgia,serif" font-size="18">API local</text><text x="85" y="138" text-anchor="middle" fill="#737b76" font-size="10">127.0.0.1:8765</text></g>
+    <path d="M510 155H588" stroke="#9a755f" stroke-width="3"/><path d="M580 147l11 8-11 8" fill="none" stroke="#9a755f" stroke-width="3"/>
+    <g transform="translate(594 43)"><rect width="211" height="224" rx="22" fill="#fffdf9" stroke="#d9cfc8"/><text x="105" y="34" text-anchor="middle" fill="#9a6d55" font-size="9" letter-spacing="2">NO SEU WINDOWS</text><g font-size="10" fill="#4f5d58"><rect x="20" y="53" width="171" height="34" rx="10" fill="#e8eee5"/><text x="35" y="75">data\produtos.db</text><rect x="20" y="98" width="171" height="34" rx="10" fill="#eee7df"/><text x="35" y="120">media\produtos\</text><rect x="20" y="143" width="171" height="34" rx="10" fill="#e7edf1"/><text x="35" y="165">config\.env</text><rect x="20" y="188" width="171" height="20" rx="10" fill="#f1efeb"/><text x="35" y="202" font-size="8">lumina-api.log</text></g></g>
+  </g>
+</svg>

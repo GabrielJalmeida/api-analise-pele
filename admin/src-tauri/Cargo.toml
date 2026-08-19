@@ -1,0 +1,17 @@
+[package]
+name = "skin-admin"
+version = "4.0.0"
+description = "Painel desktop da API de análise de pele"
+authors = ["Gabriel Almeida"]
+edition = "2021"
+
+[lib]
+name = "skin_admin_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-shell = "2"

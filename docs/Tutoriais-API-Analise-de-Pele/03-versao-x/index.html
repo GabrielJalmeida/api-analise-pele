@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Tutorial visual para instalar e usar o painel Windows da Versão X da API de Análise de Pele.">
+  <title>Tutorial 3 — Instalar e usar a Versão X</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-x" data-tutorial="versao-x">
+  <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+  <div class="reading-progress" aria-hidden="true"><span data-reading-progress></span></div>
+
+  <div class="page">
+    <aside class="sidebar" aria-label="Navegação do tutorial">
+      <a class="back-link" href="../LEIA-ME.html">← Todos os tutoriais</a>
+      <div class="brand">
+        <span class="brand-mark">X</span>
+        <strong>Versão Especial</strong>
+        <span>Instalação e uso do Skin Admin</span>
+      </div>
+      <p class="toc-title">Neste guia</p>
+      <nav class="toc">
+        <a href="#visao-geral">Conhecer a edição</a>
+        <a href="#instalar">1. Instalar</a>
+        <a href="#primeiro-uso">2. Primeiro uso</a>
+        <a href="#catalogo">3. Catálogo</a>
+        <a href="#ia">4. Configurar IA</a>
+        <a href="#pedidos">5. Pedidos</a>
+        <a href="#dados">6. Dados e backup</a>
+        <a href="#diferencas">Diferenças</a>
+        <a href="#gerar">Gerar instalador</a>
+        <a href="#problemas">Erros comuns</a>
+      </nav>
+      <div class="sidebar-actions">
+        <button type="button" data-print>Imprimir / PDF</button>
+        <button type="button" data-reset-checks>Limpar progresso</button>
+      </div>
+    </aside>
+
+    <main class="content" id="conteudo">
+      <section class="hero" id="visao-geral">
+        <div class="hero-copy">
+          <span class="eyebrow">Tutorial 03 • Versão X</span>
+          <h1>Seu catálogo em um <em>aplicativo Windows.</em></h1>
+          <p>O Skin Admin abre em uma janela própria, inicia sua API local silenciosamente e guarda banco, imagens e configurações no computador.</p>
+          <div class="hero-meta">
+            <span class="pill">Sem navegador</span>
+            <span class="pill">Banco começa vazio</span>
+            <span class="pill">Gemini, OpenAI ou Claude</span>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <img src="assets/painel-desktop.svg" alt="Ilustração do aplicativo Skin Admin da Versão X">
+        </div>
+      </section>
+
+      <div class="start-card">
+        <span class="icon" aria-hidden="true">X</span>
+        <div><strong>Para quem é este guia</strong><span>Para quem recebeu o instalador ou o código-fonte da Versão X e quer administrar um catálogo próprio.</span></div>
+        <a href="#instalar">Começar</a>
+      </div>
+
+      <section class="chapter">
+        <header class="chapter-head">
+          <span class="chapter-number">X</span>
+          <div><h2>Antes de instalar</h2><p>Entenda a diferença entre o instalador pronto e o código-fonte.</p></div>
+        </header>
+
+        <div class="two-col">
+          <article class="info-card">
+            <span class="mini-icon">EXE</span>
+            <h3>Você recebeu <code>*-setup.exe</code></h3>
+            <p>Pode seguir diretamente para a instalação. Depois de instalado, o usuário final não precisa instalar Python, Node.js, Rust nem abrir o VS Code.</p>
+          </article>
+          <article class="info-card">
+            <span class="mini-icon">ZIP</span>
+            <h3>Você recebeu apenas o código</h3>
+            <p>Primeiro alguém precisa gerar o instalador em um computador Windows. A seção <a href="#gerar">Gerar o instalador</a> explica esse processo.</p>
+          </article>
+        </div>
+
+        <div class="callout"><strong>Não precisa de chave de IA para instalar nem para executar <code>build_windows.bat</code>.</strong> A chave é configurada depois, dentro do próprio painel, somente se você quiser usar análises ou importação por IA.</div>
+      </section>
+
+      <section class="chapter" id="instalar">
+        <header class="chapter-head">
+          <span class="chapter-number">01</span>
+          <div><h2>Instale o Skin Admin</h2><p>O processo é semelhante a qualquer outro aplicativo do Windows.</p></div>
+        </header>
+
+        <figure class="visual">
+          <img src="assets/instalacao-x.svg" alt="Etapas de instalação, abertura, configuração e criação do catálogo">
+          <figcaption>Depois da instalação, a API local é iniciada pelo aplicativo; não é necessário digitar <code>uvicorn</code>.</figcaption>
+        </figure>
+
+        <div class="step-list">
+          <article class="step"><span class="step-num">1</span><h3>Localize o instalador</h3><p>O arquivo normalmente termina em <code>-setup.exe</code>. Dê dois cliques nele.</p></article>
+          <article class="step"><span class="step-num">2</span><h3>Leia o aviso do Windows</h3><p>Esta edição não possui certificado comercial de assinatura. O SmartScreen pode exibir um aviso. Só prossiga se o instalador veio do repositório ou de uma pessoa em quem você confia. Nesse caso, use <strong>Mais informações → Executar assim mesmo</strong>.</p></article>
+          <article class="step"><span class="step-num">3</span><h3>Conclua a instalação</h3><p>Siga o assistente do Windows. Ao terminar, procure <strong>Skin Admin</strong> no menu Iniciar e abra o aplicativo.</p></article>
+          <article class="step"><span class="step-num">4</span><h3>Aguarde a primeira inicialização</h3><p>O aplicativo prepara uma API local e cria as pastas de dados. A primeira abertura pode demorar um pouco mais que as seguintes.</p></article>
+        </div>
+
+        <div class="callout warning"><strong>O banco começa vazio de propósito.</strong> A Versão X não mistura seus dados com os 50 produtos fictícios da demonstração Lumina.</div>
+        <div class="checklist">
+          <label class="check-item"><input type="checkbox" data-check-id="installer"><span>Executei o instalador obtido de uma fonte confiável.</span></label>
+          <label class="check-item"><input type="checkbox" data-check-id="open"><span>O Skin Admin abriu em uma janela própria.</span></label>
+        </div>
+      </section>
+
+      <section class="chapter" id="primeiro-uso">
+        <header class="chapter-head">
+          <span class="chapter-number">02</span>
+          <div><h2>Faça a primeira configuração</h2><p>Você pode começar pelo catálogo ou configurar a IA primeiro.</p></div>
+        </header>
+
+        <div class="flow-strip">
+          <div class="flow-item"><strong>Abra o aplicativo</strong><span>A API local inicia automaticamente.</span></div>
+          <div class="flow-item"><strong>Configure a IA</strong><span>Opcional para produtos; necessária para texto, foto e importação inteligente.</span></div>
+          <div class="flow-item"><strong>Crie o catálogo</strong><span>Cadastre um produto ou importe uma planilha.</span></div>
+        </div>
+
+        <p>As seções principais do painel são:</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Seção</th><th>Para que serve</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Produtos</strong></td><td>Consultar, pesquisar, cadastrar, editar, ativar e desativar itens.</td></tr>
+              <tr><td><strong>Importar catálogo</strong></td><td>Trazer muitos produtos de uma planilha ou organizar texto com IA antes de confirmar.</td></tr>
+              <tr><td><strong>Pedidos</strong></td><td>Ver registros demonstrativos feitos no frontend. Não há pagamento.</td></tr>
+              <tr><td><strong>Configurar IA</strong></td><td>Escolher Gemini, OpenAI ou Claude e salvar a chave localmente.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout"><strong>O painel instalado é independente.</strong> Ele administra o banco e as imagens daquele computador. Não altera automaticamente o site público da Lumina nem a API hospedada na Railway.</div>
+        <label class="check-item"><input type="checkbox" data-check-id="sections"><span>Localizei Produtos, Importação, Pedidos e Configuração de IA.</span></label>
+      </section>
+
+      <section class="chapter" id="catalogo">
+        <header class="chapter-head">
+          <span class="chapter-number">03</span>
+          <div><h2>Monte seu catálogo</h2><p>Cadastre poucos produtos manualmente ou importe muitos de uma vez.</p></div>
+        </header>
+
+        <h3>Cadastro manual</h3>
+        <p>Clique em <strong>Novo produto</strong>. Somente quatro informações são essenciais:</p>
+        <div class="four-list two-col">
+          <article class="info-card"><span class="mini-icon">1</span><h3>Nome</h3><p>Como o produto será identificado.</p></article>
+          <article class="info-card"><span class="mini-icon">2</span><h3>Preço</h3><p>Valor usado na apresentação e no registro demonstrativo.</p></article>
+          <article class="info-card"><span class="mini-icon">3</span><h3>Categoria</h3><p>Limpeza, sérum, hidratante, protetor solar ou outros.</p></article>
+          <article class="info-card"><span class="mini-icon">4</span><h3>Tipo de pele</h3><p>Oleosa, seca, mista, normal ou todos.</p></article>
+        </div>
+
+        <p>Marca, descrição, foto, conteúdo/volume e ativos principais são opcionais. Quando faltam, o frontend informa isso de forma neutra em vez de inventar dados.</p>
+        <div class="callout warning"><strong>Estoque começa em zero.</strong> O produto fica salvo, mas não entra nas recomendações até receber estoque maior que zero. Ele também precisa estar ativo e compatível com o perfil.</div>
+
+        <h3>Importação em lote</h3>
+        <div class="tabs" data-tabs>
+          <div class="tab-list" role="tablist" aria-label="Métodos de importação">
+            <button class="tab-button" role="tab" aria-selected="true" aria-controls="import-planilha" id="tab-planilha">CSV ou XLSX</button>
+            <button class="tab-button" role="tab" aria-selected="false" aria-controls="import-ia" id="tab-import-ia">Texto com IA</button>
+          </div>
+          <div class="tab-panel" role="tabpanel" id="import-planilha" aria-labelledby="tab-planilha">
+            <p>Melhor para dados já organizados. O painel aceita até <strong>1.000 produtos</strong> por arquivo CSV/XLSX de até 5 MB.</p>
+            <ol><li>Abra <strong>Importar catálogo</strong>.</li><li>Escolha a opção de planilha e selecione o arquivo.</li><li>Revise a prévia e corrija linhas sinalizadas.</li><li>Confirme somente quando os dados estiverem certos.</li></ol>
+          </div>
+          <div class="tab-panel" role="tabpanel" id="import-ia" aria-labelledby="tab-import-ia" hidden>
+            <p>Melhor para informações copiadas ou bagunçadas. Cole até <strong>100 produtos</strong> por lote.</p>
+            <ol><li>Configure um provedor na seção IA.</li><li>Cole o texto disponível.</li><li>A IA organiza apenas as informações encontradas.</li><li>Revise a prévia: preços, marcas ou ativos ausentes não devem ser inventados.</li><li>Confirme o lote.</li></ol>
+          </div>
+        </div>
+
+        <div class="callout"><strong>Nada é importado imediatamente.</strong> Os dois métodos geram uma prévia e exigem confirmação humana. Isso evita gravar dezenas de produtos com colunas trocadas.</div>
+        <div class="checklist">
+          <label class="check-item"><input type="checkbox" data-check-id="first-product"><span>Cadastrei um produto com estoque maior que zero e confirmei que ele aparece ativo.</span></label>
+          <label class="check-item"><input type="checkbox" data-check-id="import"><span>Se tenho muitos produtos, escolhi planilha ou texto com IA e revisei a prévia.</span></label>
+        </div>
+      </section>
+
+      <section class="chapter" id="ia">
+        <header class="chapter-head">
+          <span class="chapter-number">04</span>
+          <div><h2>Escolha a inteligência artificial</h2><p>Você precisa configurar apenas um provedor; pode trocar quando desejar.</p></div>
+        </header>
+
+        <div class="three-col">
+          <article class="info-card"><span class="mini-icon">G</span><h3>Gemini</h3><p>Informe a chave Gemini e o modelo desejado. É o provedor originalmente usado pelo projeto.</p></article>
+          <article class="info-card"><span class="mini-icon">O</span><h3>OpenAI</h3><p>Informe sua chave OpenAI e um modelo compatível configurado no aplicativo.</p></article>
+          <article class="info-card"><span class="mini-icon">C</span><h3>Claude</h3><p>Escolha Anthropic/Claude, informe a chave e o modelo disponível na sua conta.</p></article>
+        </div>
+
+        <div class="step-list">
+          <article class="step"><span class="step-num">1</span><h3>Abra “Configurar IA”</h3><p>Selecione o provedor que você realmente pretende usar.</p></article>
+          <article class="step"><span class="step-num">2</span><h3>Informe modelo e chave</h3><p>Copie a chave criada no portal do provedor. Não use uma chave recebida de terceiros.</p></article>
+          <article class="step"><span class="step-num">3</span><h3>Salve</h3><p>A chave fica no diretório local do aplicativo e não é devolvida pela API. Feche a tela somente após a confirmação.</p></article>
+          <article class="step"><span class="step-num">4</span><h3>Faça um teste</h3><p>Use uma descrição de pele clara ou a importação por texto. Se catálogo e perfil manual funcionam, mas IA não, confira chave, modelo, quota e internet.</p></article>
+        </div>
+
+        <div class="callout danger"><strong>Fotos são encaminhadas ao provedor escolhido.</strong> A aplicação não armazena a fotografia analisada, mas o uso deve ser informado ao usuário e seguir as políticas do provedor e as regras de privacidade aplicáveis.</div>
+        <label class="check-item"><input type="checkbox" data-check-id="provider"><span>Escolhi um provedor, salvei uma chave própria e testei uma função de IA.</span></label>
+      </section>
+
+      <section class="chapter" id="pedidos">
+        <header class="chapter-head">
+          <span class="chapter-number">05</span>
+          <div><h2>Entenda o histórico</h2><p>Ele demonstra uma seleção de rotina; não transforma o projeto em loja.</p></div>
+        </header>
+
+        <div class="two-col">
+          <article class="info-card"><span class="mini-icon">✓</span><h3>O que é registrado</h3><p>Nome, e-mail e itens somente após consentimento. O sistema guarda uma cópia do nome, marca, imagem e preço daquele momento.</p></article>
+          <article class="info-card"><span class="mini-icon">×</span><h3>O que não existe</h3><p>Não há cobrança, cartão, frete, autenticação, nota fiscal ou checkout real. O estoque não diminui por padrão.</p></article>
+        </div>
+
+        <ul>
+          <li>O histórico fica associado ao navegador por um identificador armazenado no banco apenas como hash.</li>
+          <li>O usuário pode apagar o próprio histórico.</li>
+          <li>Registros expiram automaticamente e têm retenção máxima de 365 dias.</li>
+          <li>A seção <strong>Pedidos</strong> no painel serve para visualizar os registros da API local.</li>
+        </ul>
+
+        <div class="callout warning"><strong>Para vender de verdade, crie outro módulo.</strong> Pagamento, contas, segurança financeira, entrega, legislação e baixa de estoque precisam de projeto próprio.</div>
+      </section>
+
+      <section class="chapter" id="dados">
+        <header class="chapter-head">
+          <span class="chapter-number">06</span>
+          <div><h2>Saiba onde ficam seus dados</h2><p>O aplicativo não depende do banco da demonstração pública.</p></div>
+        </header>
+
+        <figure class="visual">
+          <img src="assets/dados-locais.svg" alt="Aplicativo conectado à API local e aos arquivos armazenados no Windows">
+          <figcaption>Por padrão, cada instalação cria e administra seu próprio conjunto de dados.</figcaption>
+        </figure>
+
+        <p>Os arquivos ficam dentro de:</p>
+        <div class="code-block"><div class="code-head"><span>Windows • pasta de dados</span><button class="copy-button" type="button">Copiar</button></div><pre><code>%LOCALAPPDATA%\com.gabrielalmeida.skinadmin\</code></pre></div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Item</th><th>Conteúdo</th></tr></thead>
+            <tbody>
+              <tr><td><code>data\produtos.db</code></td><td>Produtos e registros demonstrativos.</td></tr>
+              <tr><td><code>media\produtos\</code></td><td>Imagens enviadas pelo painel.</td></tr>
+              <tr><td><code>config\.env</code></td><td>Configuração local, inclusive provedor e chave.</td></tr>
+              <tr><td><code>lumina-api.log</code></td><td>Informações úteis quando algo falha.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Backup simples</h3>
+        <ol><li>Feche o Skin Admin.</li><li>Pressione <kbd>Win</kbd> + <kbd>R</kbd>.</li><li>Cole o caminho acima e pressione Enter.</li><li>Copie a pasta inteira para um local seguro.</li></ol>
+        <p>Ao restaurar, mantenha o aplicativo fechado e preserve a estrutura das pastas. Proteja o backup: <code>config\.env</code> pode conter uma chave privada.</p>
+        <div class="callout danger"><strong>Não publique essa pasta no GitHub.</strong> Ela pode conter catálogo real, histórico e chave de IA.</div>
+        <label class="check-item"><input type="checkbox" data-check-id="backup"><span>Localizei a pasta de dados e defini onde guardar um backup protegido.</span></label>
+      </section>
+
+      <section class="chapter" id="diferencas">
+        <header class="chapter-head">
+          <span class="chapter-number">≠</span>
+          <div><h2>O que muda na Versão X?</h2><p>Uma comparação sem termos técnicos desnecessários.</p></div>
+        </header>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Antes / v3.9</th><th>Versão X</th></tr></thead>
+            <tbody>
+              <tr><td>Era preciso abrir terminais e iniciar a API e o painel.</td><td>O painel instalado inicia a API local silenciosamente.</td></tr>
+              <tr><td>O projeto de demonstração podia carregar 50 produtos fictícios.</td><td>Cada instalação começa vazia e pronta para o catálogo do usuário.</td></tr>
+              <tr><td>Cadastro pensado principalmente produto por produto.</td><td>Também importa planilhas e organiza dados soltos com IA.</td></tr>
+              <tr><td>Mais campos editoriais eram exigidos.</td><td>Somente nome, preço, categoria e tipo de pele são essenciais.</td></tr>
+              <tr><td>Resultado visual mais próximo de uma lista de catálogo.</td><td>Produtos aparecem como etapas de uma rotina, com principal e alternativas.</td></tr>
+              <tr><td>A configuração dependia de arquivos do projeto.</td><td>O aplicativo permite escolher Gemini, OpenAI ou Claude pelo painel.</td></tr>
+              <tr><td>Não havia fluxo completo de registro demonstrativo.</td><td>É possível registrar e apagar seleções, com consentimento e prazo máximo de 365 dias.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout"><strong>O frontend Lumina continua sendo uma demonstração.</strong> Uma empresa pode criar seu próprio site e hospedar sua própria API. O aplicativo local existe para facilitar o gerenciamento de uma instância própria, não para controlar secretamente a demonstração pública.</div>
+      </section>
+
+      <section class="chapter" id="gerar">
+        <header class="chapter-head">
+          <span class="chapter-number">⚙</span>
+          <div><h2>Se você só tem o código: gere o instalador</h2><p>Esta parte é para quem vai preparar o arquivo de instalação, não para o usuário final.</p></div>
+        </header>
+
+        <p>Use um computador Windows com:</p>
+        <ul><li>Python 3.12;</li><li>Node.js LTS;</li><li>Rust e Cargo;</li><li>Microsoft C++ Build Tools;</li><li>Microsoft Edge WebView2.</li></ul>
+
+        <p>Extraia a Versão X, abra a pasta raiz e execute:</p>
+        <div class="code-block"><div class="code-head"><span>CMD • raiz da Versão X</span><button class="copy-button" type="button">Copiar</button></div><pre><code>build_windows.bat</code></pre></div>
+
+        <p>O processo instala dependências, testa, compila a API auxiliar e monta o instalador. As saídas esperadas são:</p>
+        <div class="code-block"><div class="code-head"><span>Arquivos gerados</span><button class="copy-button" type="button">Copiar</button></div><pre><code>dist\lumina-api.exe
+admin\src-tauri\target\release\bundle\nsis\*-setup.exe</code></pre></div>
+
+        <div class="callout warning"><strong>Demora e usa bastante espaço.</strong> O script só precisa ser executado para criar uma nova distribuição. Não feche a janela durante a compilação.</div>
+        <p>Como alternativa, o repositório possui um fluxo manual chamado <code>build-desktop-windows.yml</code>, que pode gerar os artefatos em um executor Windows do GitHub.</p>
+        <label class="check-item"><input type="checkbox" data-check-id="build"><span>Se recebi apenas o código, gerei o <code>*-setup.exe</code> em Windows ou pelo fluxo do GitHub.</span></label>
+      </section>
+
+      <section class="chapter" id="problemas">
+        <header class="chapter-head">
+          <span class="chapter-number">?</span>
+          <div><h2>Erros mais comuns</h2><p>Primeiro identifique se a falha ocorre ao instalar, abrir, salvar produtos ou usar IA.</p></div>
+        </header>
+
+        <div class="accordion">
+          <details><summary>O Windows mostra “aplicativo não reconhecido”</summary><div>O instalador não tem certificado comercial. Confirme a origem do arquivo antes de continuar. Se foi gerado por você ou veio do repositório confiável, abra <strong>Mais informações</strong> e escolha executar.</div></details>
+          <details><summary>O painel abre, mas não carrega dados</summary><div>Feche e abra novamente. Se persistir, consulte <code>lumina-api.log</code> na pasta de dados. Verifique também se outro programa está usando a porta local 8765.</div></details>
+          <details><summary>O catálogo está vazio</summary><div>Isso é esperado no primeiro uso. Cadastre um produto ou use a importação. Os produtos fictícios da Lumina não são adicionados automaticamente.</div></details>
+          <details><summary>Cadastrei o produto, mas ele não é recomendado</summary><div>Defina estoque maior que zero, mantenha o item ativo e confira o tipo de pele. Sem esses três requisitos, o produto fica no catálogo, mas não entra na curadoria.</div></details>
+          <details><summary>Catálogo funciona, mas texto, foto ou importação com IA não</summary><div>Essas funções exigem internet, provedor, modelo e chave válidos. Abra <strong>Configurar IA</strong>. Não é necessário preencher as chaves dos três provedores.</div></details>
+          <details><summary>A importação encontrou erros</summary><div>Revise a prévia. Quatro campos são essenciais: nome, preço, categoria e tipo de pele. Corrija nomes de categorias, números e produtos duplicados antes de confirmar.</div></details>
+          <details><summary>O build_windows.bat falhou</summary><div>Confirme Python 3.12, Node LTS, Rust/Cargo, C++ Build Tools e WebView2. Leia a primeira mensagem de erro real, não apenas a última linha. O arquivo <code>docs\GUIA_DESKTOP.md</code> do projeto detalha o build.</div></details>
+        </div>
+
+        <div class="progress-card">
+          <div class="progress-row"><strong>Seu progresso neste guia</strong><span data-check-progress-text>0 etapas</span></div>
+          <div class="progress-track"><span data-check-progress></span></div>
+        </div>
+      </section>
+
+      <section class="chapter">
+        <header class="chapter-head">
+          <span class="chapter-number">✓</span>
+          <div><h2>Versão X pronta para uso</h2><p>Antes de entregar o computador ou o instalador, confira:</p></div>
+        </header>
+        <div class="checklist">
+          <label class="check-item"><input type="checkbox" data-check-id="final-app"><span>O aplicativo abre sem terminal nem navegador.</span></label>
+          <label class="check-item"><input type="checkbox" data-check-id="final-product"><span>Um produto com estoque aparece corretamente no catálogo.</span></label>
+          <label class="check-item"><input type="checkbox" data-check-id="final-import"><span>A prévia de importação funciona e nada é gravado sem confirmação.</span></label>
+          <label class="check-item"><input type="checkbox" data-check-id="final-ai"><span>O provedor escolhido executa ao menos uma análise de teste.</span></label>
+          <label class="check-item"><input type="checkbox" data-check-id="final-backup"><span>Existe um backup protegido da pasta local de dados.</span></label>
+        </div>
+      </section>
+
+      <footer class="site-footer">
+        <span>Tutorial 3 • Análise de Pele — Versão X</span>
+        <span>Painel e API locais; frontend e hospedagem continuam escolhas do usuário.</span>
+      </footer>
+    </main>
+  </div>
+
+  <div class="toast" data-toast role="status" aria-live="polite"></div>
+  <script src="script.js"></script>
+</body>
+</html>

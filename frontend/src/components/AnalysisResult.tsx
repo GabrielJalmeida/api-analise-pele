@@ -1,87 +1,20 @@
 import { motion } from 'motion/react'
 
+import RecommendationsRoutine from './RecommendationsRoutine'
+
 import type {
-  CategoriaProduto,
   RespostaAnaliseTexto,
 } from '../types/analise'
-
-const API_URL = (
-  import.meta.env.VITE_API_URL ?? ''
-).replace(/\/$/, '')
-
-function montarUrlImagem(
-  imagemUrl: string,
-): string {
-  if (
-    imagemUrl.startsWith('http://')
-    || imagemUrl.startsWith('https://')
-  ) {
-    return imagemUrl
-  }
-
-  return `${API_URL}${imagemUrl}`
-}
 
 interface AnalysisResultProps {
   resultado: RespostaAnaliseTexto
 }
-
-const nomesCategorias: Record<
-  CategoriaProduto,
-  string
-> = {
-  limpeza: 'Limpeza',
-  hidratante: 'Hidratação',
-  serum: 'Séruns',
-  protetor_solar: 'Proteção solar',
-  outros: 'Outros cuidados',
-}
-
-const ordemCategorias: CategoriaProduto[] = [
-  'limpeza',
-  'hidratante',
-  'serum',
-  'protetor_solar',
-  'outros',
-]
 
 const nomesPerfil = {
   oleosa: 'Predominância de oleosidade',
   seca: 'Tendência ao ressecamento',
   mista: 'Características combinadas',
   normal: 'Perfil equilibrado',
-}
-
-function traduzirMotivo(
-  motivo: string,
-): string {
-  const motivos: Record<string, string> = {
-    'Compatível com o tipo de pele identificado':
-      'Compatível com o seu perfil',
-
-    'Indicado para pele com espinhas':
-      'Selecionado considerando as características informadas',
-
-    'Indicado para diferentes tipos de pele':
-      'Uma opção versátil para diferentes perfis',
-
-    'Adequado para pele sensível':
-      'Compatível com perfis que exigem cuidados mais delicados',
-  }
-
-  return motivos[motivo] ?? motivo
-}
-
-function formatarPreco(
-  preco: number,
-) {
-  return new Intl.NumberFormat(
-    'pt-BR',
-    {
-      style: 'currency',
-      currency: 'BRL',
-    },
-  ).format(preco)
 }
 
 function AnalysisResult({
@@ -278,19 +211,6 @@ function AnalysisResult({
     )
   }
 
-  /*
-   * 3. Se chegou até aqui, é uma resposta
-   * com perfil e recomendações.
-   */
-  const categoriasDisponiveis =
-    ordemCategorias.filter(
-      (categoria) =>
-        resultado.recomendacoes[categoria]
-          ?.length,
-    )
-
-  let indiceProduto = 0
-
   return (
     <section
       id="resultado-analise"
@@ -347,187 +267,14 @@ function AnalysisResult({
           </div>
         </motion.div>
 
-        <motion.div
-          className="mt-10 flex items-center justify-between"
-          initial={{
-            opacity: 0,
-          }}
-          animate={{
-            opacity: 1,
-          }}
-          transition={{
-            duration: 0.7,
-            delay: 0.25,
-          }}
-        >
-          <p className="text-sm text-[#656963]">
-            {resultado.total_recomendacoes}{' '}
-            {resultado.total_recomendacoes === 1
-              ? 'produto selecionado'
-              : 'produtos selecionados'}
-          </p>
-
-          <span className="text-xs text-[#95978f]">
-            Catálogo Lumina
-          </span>
-        </motion.div>
-
-        <div className="mt-16 space-y-20">
-          {categoriasDisponiveis.map(
-            (categoria) => {
-              const produtos =
-                resultado.recomendacoes[
-                categoria
-                ] ?? []
-
-              return (
-                <div key={categoria}>
-                  <motion.div
-                    className="mb-7 flex items-end justify-between border-b border-[#e0dad2] pb-4"
-                    initial={{
-                      opacity: 0,
-                      y: 12,
-                    }}
-                    animate={{
-                      opacity: 1,
-                      y: 0,
-                    }}
-                    transition={{
-                      duration: 0.6,
-                      delay: 0.3,
-                    }}
-                  >
-                    <h3 className="font-serif text-2xl text-[#0d1b2a] sm:text-3xl">
-                      {
-                        nomesCategorias[
-                        categoria
-                        ]
-                      }
-                    </h3>
-
-                    <span className="text-xs text-[#92948d]">
-                      {produtos.length}{' '}
-                      {produtos.length === 1
-                        ? 'seleção'
-                        : 'seleções'}
-                    </span>
-                  </motion.div>
-
-                  <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                    {produtos.map(
-                      (produto) => {
-                        const atraso =
-                          0.4 +
-                          indiceProduto *
-                          0.1
-
-                        indiceProduto += 1
-
-                        return (
-                          <motion.article
-                            key={produto.id}
-                            className="
-  group relative
-  overflow-hidden
-  rounded-[2rem]
-  border border-[#ded8cf]
-  bg-[#fbfaf7]
-  p-7 sm:p-8
-"
-                            initial={{
-                              opacity: 0,
-                              y: 26,
-                            }}
-                            animate={{
-                              opacity: 1,
-                              y: 0,
-                            }}
-                            transition={{
-                              duration: 0.65,
-                              delay: atraso,
-                              ease: 'easeOut',
-                            }}
-                            whileHover={{
-                              y: -4,
-                            }}
-                          >
-                            <div className="-mx-7 -mt-7 mb-7 overflow-hidden rounded-t-[2rem] bg-[#f1eee8] sm:-mx-8 sm:-mt-8">
-                              <div className="aspect-[4/3] w-full">
-                                <img
-                                  src={montarUrlImagem(
-                                    produto.imagem_url,
-                                  )}
-                                  alt={produto.nome}
-                                  loading="lazy"
-                                  className="
-        h-full w-full
-        object-contain
-        p-6
-        transition-transform
-        duration-500
-        group-hover:scale-[1.03]
-      "
-                                />
-                              </div>
-                            </div>
-                            <div className="flex items-start justify-between">
-                              <span className="text-xs uppercase tracking-[0.2em] text-[#8b7964]">
-                                {
-                                  nomesCategorias[
-                                  produto
-                                    .categoria
-                                  ]
-                                }
-                              </span>
-
-                              <span className="h-2.5 w-2.5 rounded-full bg-[#a9b6a2]" />
-                            </div>
-
-                            <div className="mt-14">
-                              <h4 className="font-serif text-2xl leading-tight tracking-[-0.02em] text-[#0d1b2a]">
-                                {produto.nome}
-                              </h4>
-
-                              <p className="mt-4 text-lg text-[#0d1b2a]">
-                                {formatarPreco(
-                                  produto.preco,
-                                )}
-                              </p>
-                            </div>
-
-                            <div className="mt-8 space-y-3 border-t border-[#e4dfd8] pt-6">
-                              {produto.motivos_compatibilidade.map(
-                                (
-                                  motivo,
-                                  indice,
-                                ) => (
-                                  <div
-                                    key={`${produto.id}-${indice}`}
-                                    className="flex gap-3"
-                                  >
-                                    <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#a9b6a2]" />
-
-                                    <p className="text-xs leading-6 text-[#72766f]">
-                                      {traduzirMotivo(
-                                        motivo,
-                                      )}
-                                    </p>
-                                  </div>
-                                ),
-                              )}
-                            </div>
-
-                            <div className="pointer-events-none absolute -bottom-20 -right-16 h-40 w-40 rounded-full bg-[#a9b6a2]/0 blur-2xl transition-all duration-500 group-hover:bg-[#a9b6a2]/15" />
-                          </motion.article>
-                        )
-                      },
-                    )}
-                  </div>
-                </div>
-              )
-            },
-          )}
-        </div>
+        <RecommendationsRoutine
+          recomendacoes={
+            resultado.recomendacoes
+          }
+          totalRecomendacoes={
+            resultado.total_recomendacoes
+          }
+        />
 
         <motion.p
           className="mx-auto mt-20 max-w-2xl text-center text-xs leading-6 text-[#8a8d87]"

@@ -14,6 +14,7 @@ import AnalysisWorkspace from './components/AnalysisWorkspace'
 import Hero from './components/Hero'
 import HowItWorks from './components/HowItWorks'
 import PhotoResult from './components/PhotoResult'
+import PurchaseHistory from './components/PurchaseHistory'
 
 import luminaLogo from './assets/luminaLogo.png'
 
@@ -30,6 +31,9 @@ function App() {
 
   const [tipoAnalise, setTipoAnalise] =
     useState<TipoAnalise | null>(null)
+
+  const [historicoAberto, setHistoricoAberto] =
+    useState(false)
 
   const [
     resultadoTexto,
@@ -174,14 +178,32 @@ function App() {
             >
               Sobre
             </a>
+
+            <button
+              type="button"
+              onClick={() => setHistoricoAberto(true)}
+              className="transition-colors hover:text-[#0d1b2a]"
+            >
+              Meus rituais
+            </button>
           </nav>
 
-          <a
-            href="#analise"
-            className="rounded-full bg-[#0d1b2a] px-5 py-2.5 text-sm text-white transition-transform hover:-translate-y-0.5"
-          >
-            Começar análise
-          </a>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setHistoricoAberto(true)}
+              className="rounded-full border border-[#cfc8be] bg-white/45 px-4 py-2.5 text-xs text-[#0d1b2a] md:hidden"
+            >
+              Histórico
+            </button>
+
+            <a
+              href="#analise"
+              className="rounded-full bg-[#0d1b2a] px-4 py-2.5 text-xs text-white transition-transform hover:-translate-y-0.5 sm:px-5 sm:text-sm"
+            >
+              Começar análise
+            </a>
+          </div>
         </div>
       </motion.header>
 
@@ -358,6 +380,11 @@ function App() {
           )}
         </>
       )}
+
+      <PurchaseHistory
+        aberto={historicoAberto}
+        onFechar={() => setHistoricoAberto(false)}
+      />
     </main>
   )
 }

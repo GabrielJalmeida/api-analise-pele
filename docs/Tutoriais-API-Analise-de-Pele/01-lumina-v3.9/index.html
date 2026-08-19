@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Tutorial completo para instalar, executar e testar a Lumina Skin v3.9 no Windows usando VS Code.">
+  <title>Tutorial 1 — Rodar a Lumina v3.9</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-tutorial="lumina-v39">
+  <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+  <div class="reading-progress" aria-hidden="true"><span data-reading-progress></span></div>
+
+  <div class="page">
+    <aside class="sidebar" aria-label="Navegação do tutorial">
+      <a class="back-link" href="../LEIA-ME.html">← Todos os tutoriais</a>
+      <div class="brand">
+        <span class="brand-mark">L</span>
+        <strong>Lumina v3.9</strong>
+        <span>Guia de instalação e teste local</span>
+      </div>
+      <p class="toc-title">Neste guia</p>
+      <nav class="toc">
+        <a href="#visao-geral">Visão geral</a>
+        <a href="#preparar">1. Preparar</a>
+        <a href="#backend">2. API</a>
+        <a href="#frontend">3. Site</a>
+        <a href="#painel">4. Painel</a>
+        <a href="#testar">5. Testar</a>
+        <a href="#proximas-vezes">6. Reabrir</a>
+        <a href="#problemas">Erros comuns</a>
+        <a href="#online">Versão online</a>
+      </nav>
+      <div class="sidebar-actions">
+        <button type="button" data-print>Imprimir / PDF</button>
+        <button type="button" data-reset-checks>Limpar progresso</button>
+      </div>
+    </aside>
+
+    <main class="content" id="conteudo">
+      <section class="hero" id="visao-geral">
+        <div class="hero-copy">
+          <span class="eyebrow">Tutorial 01 • Windows + VS Code</span>
+          <h1>Coloque a Lumina <em>para funcionar.</em></h1>
+          <p>Ao final, você terá três partes rodando no computador: a API que faz o trabalho, o site que o visitante usa e o painel que administra os produtos.</p>
+          <div class="hero-meta">
+            <span class="pill">Nível iniciante</span>
+            <span class="pill">Passo a passo completo</span>
+            <span class="pill">Sem alterar código</span>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <img src="assets/ambiente-v39.svg" alt="VS Code exibindo os terminais da API, do site e do painel da Lumina">
+        </div>
+      </section>
+
+      <div class="start-card">
+        <span class="icon" aria-hidden="true">✓</span>
+        <div><strong>Objetivo do tutorial</strong><span>Baixar a versão 3.9, criar o banco, iniciar os três componentes e realizar uma análise.</span></div>
+        <a href="#preparar">Começar agora</a>
+      </div>
+
+      <section class="chapter" id="preparar">
+        <header class="chapter-head">
+          <span class="chapter-number">01</span>
+          <div><h2>Prepare o computador</h2><p>Esta parte é feita uma vez. Depois, iniciar o projeto será bem mais curto.</p></div>
+        </header>
+
+        <p class="lead">O projeto não é um único arquivo: Python executa a API e Node.js executa as duas interfaces React. O VS Code permite manter tudo organizado em uma pasta e em três terminais.</p>
+
+        <div class="three-col">
+          <article class="info-card"><span class="mini-icon">Py</span><h3>Python 3.12</h3><p>Executa o FastAPI, o banco SQLite e a integração com o Gemini. Durante a instalação, marque <strong>Add Python to PATH</strong>.</p></article>
+          <article class="info-card"><span class="mini-icon">N</span><h3>Node.js LTS</h3><p>Inclui o comando <code>npm</code>, usado para instalar e iniciar o site e o painel.</p></article>
+          <article class="info-card"><span class="mini-icon">V</span><h3>Visual Studio Code</h3><p>Será usado para abrir a pasta, editar o arquivo <code>.env</code> e manter os terminais visíveis.</p></article>
+        </div>
+
+        <div class="callout"><strong>Como conferir:</strong> abra o Prompt de Comando e execute <code>python --version</code>, <code>node --version</code> e <code>code --version</code>. Se os três mostrarem uma versão, está pronto.</div>
+
+        <h3>Baixe a versão correta</h3>
+        <ol>
+          <li>Acesse o repositório ou baixe diretamente o ZIP da tag <strong>v3.9.0</strong>.</li>
+          <li>Extraia o ZIP. Não execute o projeto de dentro da janela do arquivo compactado.</li>
+          <li>Renomeie a pasta, se desejar, para <code>analise-pele-V3</code>.</li>
+          <li>No VS Code, escolha <strong>File → Open Folder</strong> e selecione essa pasta.</li>
+        </ol>
+
+        <div class="button-row">
+          <a class="button" href="https://github.com/GabrielJalmeida/api-analise-pele/archive/refs/tags/v3.9.0.zip">Baixar v3.9.0</a>
+          <a class="button secondary" href="https://github.com/GabrielJalmeida/api-analise-pele/tree/v3.9.0">Ver código no GitHub</a>
+        </div>
+
+        <label class="check-item"><input type="checkbox" data-check-id="programas"><span>Instalei Python, Node.js e VS Code.</span></label>
+        <label class="check-item"><input type="checkbox" data-check-id="pasta"><span>Extraí a v3.9.0 e abri a pasta raiz no VS Code.</span></label>
+
+        <div class="callout warning"><strong>Você deve ver na raiz:</strong> pastas <code>admin</code>, <code>frontend</code>, <code>routers</code> e arquivos como <code>main.py</code> e <code>requirements.txt</code>. Se o VS Code mostrar apenas outra pasta com o mesmo nome, abra essa pasta interna.</div>
+      </section>
+
+      <section class="chapter" id="backend">
+        <header class="chapter-head">
+          <span class="chapter-number">02</span>
+          <div><h2>Inicie a API</h2><p>Ela recebe os pedidos das interfaces, acessa a IA, consulta o banco e devolve respostas.</p></div>
+        </header>
+
+        <figure class="visual">
+          <img src="assets/ambiente-v39.svg" alt="Ilustração do terminal de backend rodando na porta 8000">
+          <figcaption>O primeiro terminal fica ocupado pela API. Não o feche enquanto estiver usando o sistema.</figcaption>
+        </figure>
+
+        <div class="step-list">
+          <article class="step">
+            <span class="step-num">1</span>
+            <h3>Abra o primeiro terminal</h3>
+            <p>No VS Code, use o menu <strong>Terminal → New Terminal</strong> ou pressione <kbd>Ctrl</kbd> + <kbd>`</kbd>. Confira se o caminho mostrado termina na pasta raiz do projeto.</p>
+          </article>
+
+          <article class="step">
+            <span class="step-num">2</span>
+            <h3>Crie o ambiente virtual</h3>
+            <p>A pasta <code>.venv</code> separa as bibliotecas deste projeto das demais instalações do computador.</p>
+            <div class="code-block"><div class="code-head"><span>CMD • raiz do projeto</span><button class="copy-button" type="button">Copiar</button></div><pre><code>python -m venv .venv
+.venv\Scripts\activate
+python -m pip install -r requirements.txt</code></pre></div>
+            <p class="fine-print">Quando a ativação funcionar, <code>(.venv)</code> aparecerá antes do caminho no terminal. A instalação pode demorar alguns minutos.</p>
+          </article>
+
+          <article class="step">
+            <span class="step-num">3</span>
+            <h3>Crie e configure o arquivo privado</h3>
+            <div class="code-block"><div class="code-head"><span>CMD • raiz do projeto</span><button class="copy-button" type="button">Copiar</button></div><pre><code>copy .env.example .env</code></pre></div>
+            <p>No explorador lateral do VS Code, abra <code>.env</code>. Para usar análises por texto e foto, coloque uma chave válida do Google AI Studio após o sinal de igual:</p>
+            <div class="file-card"><header>.env — exemplo local da v3.9</header><pre><code>GEMINI_API_KEY=cole_sua_chave_real_aqui
+GEMINI_MODEL=gemini-3.5-flash-lite
+APP_ENV=development
+DATABASE_PATH=produtos.db
+CORS_ORIGINS=http://localhost:5173,http://localhost:5174</code></pre></div>
+            <div class="callout danger"><strong>Nunca compartilhe o arquivo <code>.env</code>.</strong> A chave fica somente no backend. Não coloque a chave em arquivos da pasta <code>frontend</code> ou em código JavaScript.</div>
+          </article>
+
+          <article class="step">
+            <span class="step-num">4</span>
+            <h3>Crie o banco e carregue a demonstração</h3>
+            <div class="code-block"><div class="code-head"><span>CMD • ambiente virtual ativo</span><button class="copy-button" type="button">Copiar</button></div><pre><code>python criar_banco.py
+python popular_catalogo.py --aplicar</code></pre></div>
+            <p>O primeiro comando cria as tabelas. O segundo adiciona o catálogo fictício da Lumina. Execute a carga apenas quando quiser essa demonstração; um projeto próprio pode começar com banco vazio.</p>
+          </article>
+
+          <article class="step">
+            <span class="step-num">5</span>
+            <h3>Ligue a API</h3>
+            <div class="code-block"><div class="code-head"><span>CMD • mantenha este terminal aberto</span><button class="copy-button" type="button">Copiar</button></div><pre><code>uvicorn main:app --reload</code></pre></div>
+            <p>Quando aparecer <code>Uvicorn running on http://127.0.0.1:8000</code>, segure <kbd>Ctrl</kbd> e clique no endereço. Para ver e testar as rotas, abra <a href="http://127.0.0.1:8000/docs">http://127.0.0.1:8000/docs</a>.</p>
+          </article>
+        </div>
+
+        <label class="check-item"><input type="checkbox" data-check-id="venv"><span>Criei e ativei o ambiente virtual; as dependências terminaram de instalar.</span></label>
+        <label class="check-item"><input type="checkbox" data-check-id="env"><span>Criei o <code>.env</code> e configurei a chave sem publicá-la.</span></label>
+        <label class="check-item"><input type="checkbox" data-check-id="api"><span>A documentação <code>/docs</code> abriu no navegador.</span></label>
+      </section>
+
+      <section class="chapter" id="frontend">
+        <header class="chapter-head">
+          <span class="chapter-number">03</span>
+          <div><h2>Inicie o site público</h2><p>A interface Lumina conversa com a API que já está rodando na porta 8000.</p></div>
+        </header>
+
+        <p class="lead">Não escreva novos comandos no terminal da API. Clique no símbolo <strong>+</strong> do painel de terminais do VS Code para abrir um segundo terminal.</p>
+
+        <div class="code-block"><div class="code-head"><span>Terminal 2 • site público</span><button class="copy-button" type="button">Copiar</button></div><pre><code>cd frontend
+npm install
+copy .env.example .env
+npm run dev</code></pre></div>
+
+        <p>O arquivo criado deve conter:</p>
+        <div class="file-card"><header>frontend\.env</header><pre><code>VITE_API_URL=http://127.0.0.1:8000</code></pre></div>
+
+        <div class="callout"><strong>Abra pelo link certo:</strong> o terminal do Vite exibirá algo como <code>Local: http://localhost:5173/</code>. Segure <kbd>Ctrl</kbd> e clique nesse endereço. O número pode mudar se a porta já estiver em uso; use sempre o link realmente mostrado.</div>
+
+        <p>O comando <code>npm install</code> é necessário apenas na primeira instalação ou quando as dependências mudarem. <code>npm run dev</code> é o comando que liga o site.</p>
+        <label class="check-item"><input type="checkbox" data-check-id="frontend"><span>A página inicial da Lumina abriu e mostrou as três opções de análise.</span></label>
+      </section>
+
+      <section class="chapter" id="painel">
+        <header class="chapter-head">
+          <span class="chapter-number">04</span>
+          <div><h2>Inicie o painel de produtos</h2><p>Na v3.9, o painel é local e abre no navegador como uma segunda aplicação.</p></div>
+        </header>
+
+        <p>Abra um <strong>terceiro terminal</strong>. Como os novos terminais normalmente começam na raiz, execute:</p>
+        <div class="code-block"><div class="code-head"><span>Terminal 3 • painel administrativo</span><button class="copy-button" type="button">Copiar</button></div><pre><code>cd admin
+npm install
+copy .env.example .env
+npm run dev</code></pre></div>
+
+        <p>O arquivo de ambiente do painel também deve apontar para a API local:</p>
+        <div class="file-card"><header>admin\.env</header><pre><code>VITE_API_URL=http://127.0.0.1:8000</code></pre></div>
+
+        <div class="two-col">
+          <article class="info-card"><span class="mini-icon">A</span><h3>O que ele faz</h3><p>Cadastra, edita, filtra, ativa e desativa produtos; também envia imagens para o backend.</p></article>
+          <article class="info-card"><span class="mini-icon">!</span><h3>O que ele não é</h3><p>Não é um painel público protegido por login. Use esta edição apenas localmente.</p></article>
+        </div>
+
+        <p>Se o site já ocupou a porta 5173, o Vite provavelmente exibirá <code>http://localhost:5174/</code>. Use o endereço mostrado no terminal.</p>
+        <label class="check-item"><input type="checkbox" data-check-id="admin"><span>O painel abriu e mostrou os produtos carregados no banco.</span></label>
+      </section>
+
+      <section class="chapter" id="testar">
+        <header class="chapter-head">
+          <span class="chapter-number">05</span>
+          <div><h2>Teste sem adivinhar</h2><p>Use esta ordem para identificar rapidamente em qual parte está um possível problema.</p></div>
+        </header>
+
+        <figure class="visual">
+          <img src="assets/fluxo-teste.svg" alt="Três formas de análise chegando à API e às recomendações">
+          <figcaption>Os três caminhos são independentes. Foto não é obrigatória e perfil manual não consome IA.</figcaption>
+        </figure>
+
+        <div class="flow-strip">
+          <div class="flow-item"><strong>1. Perfil manual</strong><span>Prova que site, API, banco e recomendações se comunicam sem depender da IA.</span></div>
+          <div class="flow-item"><strong>2. Texto</strong><span>Prova que a chave Gemini e a análise textual estão funcionando.</span></div>
+          <div class="flow-item"><strong>3. Foto</strong><span>Prova o upload, processamento visual e resposta da IA.</span></div>
+        </div>
+
+        <h3>Checklist funcional</h3>
+        <div class="checklist">
+          <label class="check-item"><input type="checkbox" data-check-id="status"><span>Abri <code>http://127.0.0.1:8000/status</code> e recebi uma resposta JSON.</span></label>
+          <label class="check-item"><input type="checkbox" data-check-id="manual"><span>No site, informei um tipo de pele manualmente e vi produtos recomendados.</span></label>
+          <label class="check-item"><input type="checkbox" data-check-id="texto"><span>Descrevi a pele em uma frase completa e recebi um perfil.</span></label>
+          <label class="check-item"><input type="checkbox" data-check-id="foto"><span>Enviei JPG, PNG ou WEBP claro, sem filtros, e aguardei a análise.</span></label>
+          <label class="check-item"><input type="checkbox" data-check-id="crud"><span>Cadastrei ou editei um produto no painel e confirmei a alteração no catálogo.</span></label>
+        </div>
+
+        <div class="progress-card">
+          <div class="progress-row"><strong>Seu progresso neste guia</strong><span data-check-progress-text>0 etapas</span></div>
+          <div class="progress-track"><span data-check-progress></span></div>
+        </div>
+
+        <div class="callout warning"><strong>Sobre resultados de fotografia:</strong> a análise é cosmética e probabilística. Luz, enquadramento, câmera e modelo podem mudar o resultado. Uma região isolada pode permitir observações locais, mas uma foto mais ampla ajuda a estimar o tipo do rosto inteiro.</div>
+      </section>
+
+      <section class="chapter" id="proximas-vezes">
+        <header class="chapter-head">
+          <span class="chapter-number">06</span>
+          <div><h2>Como abrir nas próximas vezes</h2><p>Você não precisa reinstalar tudo. Apenas ligue cada parte novamente.</p></div>
+        </header>
+
+        <div class="tabs" data-tabs>
+          <div class="tab-list" role="tablist" aria-label="Comandos para reabrir">
+            <button class="tab-button" role="tab" aria-selected="true" aria-controls="tab-api" id="button-api">API</button>
+            <button class="tab-button" role="tab" aria-selected="false" aria-controls="tab-site" id="button-site">Site</button>
+            <button class="tab-button" role="tab" aria-selected="false" aria-controls="tab-admin" id="button-admin">Painel</button>
+          </div>
+          <div class="tab-panel" role="tabpanel" id="tab-api" aria-labelledby="button-api">
+            <p>Na raiz do projeto:</p>
+            <div class="code-block"><div class="code-head"><span>Terminal 1</span><button class="copy-button" type="button">Copiar</button></div><pre><code>.venv\Scripts\activate
+uvicorn main:app --reload</code></pre></div>
+          </div>
+          <div class="tab-panel" role="tabpanel" id="tab-site" aria-labelledby="button-site" hidden>
+            <p>Em outro terminal, a partir da raiz:</p>
+            <div class="code-block"><div class="code-head"><span>Terminal 2</span><button class="copy-button" type="button">Copiar</button></div><pre><code>cd frontend
+npm run dev</code></pre></div>
+          </div>
+          <div class="tab-panel" role="tabpanel" id="tab-admin" aria-labelledby="button-admin" hidden>
+            <p>Em outro terminal, a partir da raiz:</p>
+            <div class="code-block"><div class="code-head"><span>Terminal 3</span><button class="copy-button" type="button">Copiar</button></div><pre><code>cd admin
+npm run dev</code></pre></div>
+          </div>
+        </div>
+
+        <p>Para desligar, clique em cada terminal e pressione <kbd>Ctrl</kbd> + <kbd>C</kbd>. Fechar o navegador não desliga os servidores.</p>
+      </section>
+
+      <section class="chapter" id="problemas">
+        <header class="chapter-head">
+          <span class="chapter-number">?</span>
+          <div><h2>Erros mais comuns</h2><p>Abra somente o item que corresponde ao que apareceu na sua tela.</p></div>
+        </header>
+
+        <div class="accordion">
+          <details><summary>“python” ou “npm” não é reconhecido</summary><div>O programa não está instalado ou não foi adicionado ao PATH. Reinstale Python marcando <strong>Add Python to PATH</strong> e instale a versão LTS do Node.js. Depois feche e abra novamente o VS Code.</div></details>
+          <details><summary>Aparece “No module named ...”</summary><div>Ative a <code>.venv</code> e reinstale as dependências com <code>python -m pip install -r requirements.txt</code>. Confira também se o terminal está na raiz.</div></details>
+          <details><summary>A API abre, mas texto e foto retornam erro 503</summary><div>Catálogo e perfil manual funcionam sem IA, mas texto e foto exigem uma <code>GEMINI_API_KEY</code> válida no <code>.env</code>. Após corrigir, pare e reinicie o Uvicorn.</div></details>
+          <details><summary>O site diz que não conseguiu conectar</summary><div>Confirme se a API continua aberta na porta 8000 e se <code>frontend\.env</code> contém exatamente <code>VITE_API_URL=http://127.0.0.1:8000</code>. Reinicie o Vite depois de alterar o arquivo.</div></details>
+          <details><summary>O painel ou o site foi para outra porta</summary><div>Isso é normal quando 5173 já está ocupada. Abra o link que o Vite mostrou. Se houver bloqueio de CORS, acrescente a origem à variável <code>CORS_ORIGINS</code> do backend e reinicie a API.</div></details>
+          <details><summary>Não aparecem produtos recomendados</summary><div>O produto precisa estar ativo, ter estoque maior que zero e ser compatível com o perfil. Para a demonstração pronta, confirme que executou <code>python popular_catalogo.py --aplicar</code>.</div></details>
+          <details><summary>A foto funciona uma vez e falha em outra</summary><div>Hospedagem gratuita e provedor de IA podem oscilar. Mantenha a página aberta, use imagem até 5 MB em JPG/PNG/WEBP e tente novamente. Se o perfil manual funciona, a conexão básica com a API está correta.</div></details>
+        </div>
+      </section>
+
+      <section class="chapter" id="online">
+        <header class="chapter-head">
+          <span class="chapter-number">↗</span>
+          <div><h2>Links da demonstração hospedada</h2><p>Use-os para conhecer o projeto sem manter seu computador ligado.</p></div>
+        </header>
+
+        <div class="link-grid">
+          <a class="link-card" href="https://lumina-skin-lyart.vercel.app"><strong>Site Lumina</strong><small>lumina-skin-lyart.vercel.app</small></a>
+          <a class="link-card" href="https://api-production-f6fd.up.railway.app/status"><strong>Status da API</strong><small>api-production-f6fd.up.railway.app/status</small></a>
+          <a class="link-card" href="https://api-production-f6fd.up.railway.app/docs"><strong>Swagger / documentação</strong><small>api-production-f6fd.up.railway.app/docs</small></a>
+        </div>
+
+        <div class="callout warning"><strong>A versão pública é uma demonstração.</strong> Hospedagem gratuita pode dormir ou responder mais devagar. O painel da v3.9 continua local; as rotas administrativas públicas ficam bloqueadas.</div>
+      </section>
+
+      <footer class="site-footer">
+        <span>Tutorial 1 • Lumina Skin v3.9.0</span>
+        <span>Análise cosmética informativa — não é diagnóstico médico.</span>
+      </footer>
+    </main>
+  </div>
+
+  <div class="toast" data-toast role="status" aria-live="polite"></div>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,257 +1,320 @@
-# Lumina Skin — Análise de Pele e Recomendação de Cosméticos
+<p align="center">
+  <img src="frontend/src/assets/luminaLogo.png" alt="Logotipo Lumina Skin" width="230">
+</p>
 
-Aplicação full stack para interpretar características cosméticas da pele e revelar uma curadoria de produtos compatíveis com o perfil informado.
+<h1 align="center">API de Análise de Pele — Versão X</h1>
 
-O projeto combina um backend em FastAPI, inteligência artificial Gemini, regras determinísticas de recomendação, catálogo próprio com 50 produtos, frontend público e painel administrativo.
+<p align="center">
+  API reutilizável para análise cosmética de pele, recomendação determinística de produtos e gerenciamento de catálogo, acompanhada de uma demonstração web e de um painel instalável para Windows.
+</p>
 
-> A análise possui finalidade informativa e cosmética. O sistema não realiza diagnóstico médico e não substitui avaliação dermatológica.
+<p align="center">
+  <strong>FastAPI</strong> · <strong>React</strong> · <strong>TypeScript</strong> · <strong>SQLite</strong> · <strong>Tauri</strong> · <strong>Gemini</strong> · <strong>OpenAI</strong> · <strong>Claude</strong>
+</p>
 
-## Versão atual
+> [!IMPORTANT]
+> A análise é informativa e cosmética. O sistema não realiza diagnóstico médico, não substitui avaliação dermatológica e pode apresentar resultados diferentes conforme fotografia, descrição, modelo de IA e condições de uso.
 
-**v3.8.0 — frontend público, catálogo visual e publicação da aplicação.**
+## Estado final do projeto
 
-- Site público: [https://lumina-skin-lyart.vercel.app](https://lumina-skin-lyart.vercel.app)
-- API: [https://api-production-f6fd.up.railway.app](https://api-production-f6fd.up.railway.app)
-- Documentação da API: [https://api-production-f6fd.up.railway.app/docs](https://api-production-f6fd.up.railway.app/docs)
+| Item | Estado |
+|---|---|
+| API FastAPI | Concluída e testada |
+| Frontend público Lumina | Concluído e responsivo |
+| Painel administrativo | Concluído para uso local |
+| Aplicativo Windows | Configurado com Tauri 2 e API empacotada |
+| Inteligência artificial | Gemini, OpenAI e Anthropic Claude |
+| Catálogo em lote | CSV, XLSX ou texto organizado por IA |
+| Histórico demonstrativo | Consentimento, exclusão e retenção máxima de 365 dias |
+| Testes automatizados | 62 testes aprovados |
+| Documentação e tutoriais | Concluídos |
 
-O painel administrativo permanece local nesta versão. As operações administrativas de escrita são bloqueadas no ambiente público enquanto não houver autenticação.
+O escopo da **Versão X** está encerrado. Isso significa que a edição planejada foi implementada e validada; não significa que o projeto esteja pronto para operação comercial sem adaptações de segurança, infraestrutura, privacidade e regras de negócio.
 
-## Como o sistema funciona
+### Demonstração pública preservada
 
-O usuário pode escolher livremente entre três caminhos independentes:
+- **Site Lumina v3.9:** [https://lumina-skin-lyart.vercel.app](https://lumina-skin-lyart.vercel.app)
+- **API publicada:** [https://api-production-f6fd.up.railway.app](https://api-production-f6fd.up.railway.app)
+- **Documentação Swagger:** [https://api-production-f6fd.up.railway.app/docs](https://api-production-f6fd.up.railway.app/docs)
+- **Código preservado da v3.9.0:** [tag v3.9.0](https://github.com/GabrielJalmeida/api-analise-pele/tree/v3.9.0)
 
-- enviar uma fotografia;
-- descrever a pele por texto;
-- informar diretamente um perfil conhecido, sem utilizar IA.
+A publicação acima é uma demonstração acadêmica e de portfólio. A Versão X também pode ser instalada e usada localmente, com banco e catálogo próprios.
 
-A fotografia não é obrigatória. O frontend decide como apresentar e destacar cada opção, enquanto o backend valida apenas os dados da rota utilizada.
+## O que realmente é este projeto
 
-```text
-Foto ou descrição
-        ↓
-      Gemini
-        ↓
-Perfil estruturado da pele
-        ↓
-Motor determinístico da API
-        ↓
-Curadoria de produtos compatíveis
+O produto central é a **API de Análise de Pele**. Ela pode ser consumida por qualquer frontend compatível com HTTP e JSON.
+
+**Lumina Skin** é a marca fictícia criada para demonstrar a experiência completa. O frontend Lumina não é obrigatório e não limita a API. Uma empresa pode criar seu próprio site, identidade visual, catálogo, hospedagem e regras comerciais.
+
+O repositório reúne quatro partes:
+
+| Componente | Finalidade |
+|---|---|
+| **API FastAPI** | Analisa foto ou texto, valida perfis, gerencia produtos, calcula recomendações e registra seleções demonstrativas. |
+| **Frontend Lumina Skin** | Demonstra como uma pessoa pode realizar a análise e receber uma rotina personalizada. |
+| **Skin Admin** | Administra produtos, imagens, importações, pedidos demonstrativos e configuração de IA. |
+| **Aplicativo Windows** | Empacota o painel e uma API local em um instalador, sem exigir terminal ou navegador do usuário final. |
+
+## Tutoriais visuais
+
+O projeto possui três tutoriais completos em HTML, CSS e JavaScript. Eles funcionam offline, são responsivos e incluem ilustrações, comandos copiáveis, checklists, impressão em PDF e solução de erros comuns.
+
+### [Baixar o pacote com os três tutoriais](docs/Tutoriais-API-Analise-de-Pele.zip)
+
+Depois de baixar:
+
+1. extraia todo o arquivo ZIP;
+2. dê dois cliques em `LEIA-ME.html`;
+3. escolha o tutorial desejado.
+
+| Tutorial | Conteúdo |
+|---|---|
+| **1 — Como usar a Lumina v3.9** | Instalação pelo VS Code, ambiente virtual, banco, Uvicorn, frontend, painel e testes completos. |
+| **2 — Como integrar a API** | Conceitos para iniciantes, API local ou hospedada, chaves, CORS e exemplo funcional em HTML/CSS/JS. |
+| **3 — Como usar a Versão X** | Instalação do painel Windows, primeiro uso, IA, catálogo, importação, histórico e backup local. |
+
+O segundo tutorial inclui um pequeno frontend independente e adaptável. Nenhuma chave de IA está presente nos arquivos do navegador.
+
+## Arquitetura
+
+```mermaid
+flowchart TD
+    U["Usuário final"] --> F["Frontend escolhido"]
+    F --> A["API FastAPI"]
+    A --> I["Gemini, OpenAI ou Claude"]
+    A --> R["Motor de recomendação"]
+    R --> B["SQLite e imagens"]
+
+    P["Skin Admin desktop"] --> L["API local empacotada"]
+    L --> D["Banco e mídias locais"]
 ```
 
-A IA interpreta as informações, mas **não escolhe produtos**. A seleção do catálogo é executada por regras controladas e testáveis no backend.
+Na demonstração publicada, frontend e API ficam hospedados. No aplicativo Windows, o painel inicia uma API local em `127.0.0.1:8765` e administra somente os dados daquele computador.
 
-## Funcionalidades da v3.8.0
+## Fluxos de análise
 
-### Experiência pública
+O usuário pode escolher livremente entre três entradas independentes:
 
-- interface responsiva em React, TypeScript, Vite, Tailwind CSS e Motion;
-- análise por fotografia;
-- análise por descrição textual;
-- recomendação sem IA a partir de perfil informado diretamente;
-- tratamento de informações insuficientes e assuntos fora do escopo;
-- confirmação do tipo de pele quando fotografia e texto apresentam resultados diferentes;
-- observações visuais intermediárias durante o resultado da fotografia;
-- recomendações organizadas por categoria;
-- cards com imagem, marca, nome, descrição, conteúdo, preço, ativos e motivos de compatibilidade;
-- identidade visual própria da Lumina Skin.
+1. **Fotografia**, com descrição complementar opcional;
+2. **Descrição em texto**;
+3. **Perfil já conhecido**, sem utilizar IA.
+
+A fotografia não é obrigatória. A interface consumidora decide qual opção destacar; o backend valida apenas a rota utilizada.
+
+```mermaid
+flowchart LR
+    E["Foto, texto ou perfil"] --> P["Perfil estruturado"]
+    P --> M["Regras determinísticas"]
+    M --> C["Rotina de produtos"]
+```
+
+A inteligência artificial interpreta a entrada, mas **não escolhe os produtos**. A recomendação é executada por regras controladas e testáveis no backend.
 
 ### Análise por fotografia
 
 - aceita JPG, PNG e WEBP;
-- limita arquivos a 5 MB e imagens a 50 megapixels;
-- verifica MIME type, formato real e integridade do arquivo;
-- corrige a orientação EXIF;
-- remove metadados desnecessários;
-- reduz dimensões antes do envio à IA;
-- não armazena a fotografia analisada.
+- limita o arquivo a 5 MB e a imagem a 50 megapixels;
+- corrige orientação EXIF e remove metadados desnecessários;
+- otimiza a imagem no navegador e novamente no backend;
+- não armazena a fotografia analisada;
+- aceita rosto completo ou região facial útil;
+- permite observações locais quando não há cobertura suficiente para estimar o tipo global;
+- pode identificar espinhas, marcas pós-acne, vermelhidão, descamação e brilho excessivo;
+- usa texto complementar opcional para características que não podem ser inferidas somente pela imagem.
 
-A leitura visual pode observar:
-
-- tipo de pele e confiança da classificação;
-- espinhas;
-- marcas pós-acne;
-- vermelhidão;
-- descamação;
-- brilho excessivo.
-
-Sensibilidade não é inferida exclusivamente pela imagem. Quando informada, ela vem da descrição complementar do usuário.
+Se fotografia e texto indicarem tipos de pele diferentes, a API solicita confirmação. A confirmação chama `/recomendacoes` e não envia a fotografia novamente ao provedor.
 
 ### Análise por texto
 
-A IA interpreta a descrição e tenta estruturar:
+A descrição pode informar:
 
-- tipo de pele;
+- comportamento da pele ao longo do dia;
+- oleosidade ou ressecamento;
 - sensibilidade;
 - presença de espinhas.
 
-O fluxo distingue respostas válidas, informações insuficientes e conteúdo fora do domínio. Também possui proteções contra sujeito não humano e instruções adversariais.
+O fluxo distingue:
 
-### Catálogo e recomendações
+- análise concluída;
+- informações insuficientes;
+- conteúdo fora do domínio;
+- tentativa de instrução adversarial.
 
-O catálogo da demonstração contém 50 produtos distribuídos entre:
+### Perfil direto
 
-- limpeza;
-- sérum;
-- hidratação;
-- proteção solar;
-- outros cuidados.
+Quando a pessoa já sabe o tipo da pele, o frontend pode enviar diretamente:
 
-Antes de participar das recomendações, o produto precisa estar ativo, possuir estoque e ser compatível com o tipo de pele informado ou marcado para todos os tipos.
+```json
+{
+  "tipo_pele": "oleosa",
+  "sensivel": true,
+  "tem_espinha": true
+}
+```
 
-| Regra | Pontuação |
+Esse caminho não chama nenhum provedor de IA.
+
+## Provedores de inteligência artificial
+
+A Versão X possui uma interface comum para três provedores:
+
+| `AI_PROVIDER` | Chave utilizada | Modelo configurável |
+|---|---|---|
+| `gemini` | `GEMINI_API_KEY` | `GEMINI_MODEL` |
+| `openai` | `OPENAI_API_KEY` | `OPENAI_MODEL` |
+| `anthropic` ou `claude` | `ANTHROPIC_API_KEY` | `ANTHROPIC_MODEL` |
+
+Somente a chave do provedor ativo é necessária. Não existe troca automática entre provedores, evitando custos ou envio de dados para outra conta sem decisão explícita.
+
+Sem chave de IA, continuam funcionando:
+
+- status da API;
+- catálogo e consulta de produtos;
+- perfil direto;
+- recomendações determinísticas;
+- cadastro e importação por planilha no ambiente local.
+
+Análise por texto, análise por fotografia e importação de texto desestruturado exigem um provedor configurado.
+
+## Recomendação determinística
+
+Um produto só participa da recomendação quando:
+
+- está ativo;
+- possui estoque maior que zero;
+- corresponde ao tipo de pele informado ou é indicado para todos os tipos.
+
+| Regra | Pontuação interna |
 |---|---:|
-| Tipo de pele correspondente | +3 |
-| Produto indicado para todos os tipos | +1 |
+| Tipo de pele exato | +3 |
+| Produto para todos os tipos | +1 |
 | Compatível com pele sensível | +2 |
 | Indicado para espinhas | +2 |
 
-A pontuação determina a ordem interna das recomendações, mas não é apresentada ao usuário final.
+A pontuação ordena os resultados, mas nunca é apresentada como porcentagem de compatibilidade. O frontend mostra os motivos reais da seleção em linguagem cosmética e não diagnóstica.
 
-### Imagens dos produtos
+## Catálogo de produtos
 
-O painel administrativo permite enviar imagens JPG, PNG ou WEBP. O backend:
+Somente quatro campos são essenciais:
 
+- nome;
+- preço;
+- categoria;
+- tipo de pele.
+
+São opcionais:
+
+- marca;
+- descrição curta;
+- imagem;
+- conteúdo ou volume;
+- ativos principais.
+
+O frontend informa ausências com mensagens neutras, como “Marca não informada”, sem criar composição, benefícios ou dados que não existem.
+
+O estoque inicial é `0`. Nesse estado, o produto permanece cadastrado, mas não participa das recomendações.
+
+Categorias disponíveis:
+
+- `limpeza`;
+- `serum`;
+- `hidratante`;
+- `protetor_solar`;
+- `outros`.
+
+### Imagens de produtos
+
+O backend:
+
+- aceita JPG, PNG e WEBP;
 - valida arquivos de até 10 MB e 40 megapixels;
 - corrige orientação EXIF;
 - limita a maior dimensão a 1600 pixels;
-- converte a imagem para WebP;
-- gera um nome seguro com identificador único;
-- publica o arquivo em `/media/produtos/{categoria}/...`.
+- converte para WebP;
+- cria nome seguro com identificador único;
+- publica em `/media/produtos/{categoria}/...`;
+- remove a imagem nova quando o cadastro correspondente falha.
 
-## Painel administrativo
+## Importação rápida
 
-O projeto inclui um painel local desenvolvido com React, TypeScript, Vite e Ant Design.
+O Skin Admin possui dois métodos de importação:
 
-Ele permite:
+| Método | Limite | Indicado para |
+|---|---:|---|
+| CSV ou XLSX | 1.000 produtos e 5 MB | Catálogos já organizados |
+| Texto + IA | 100 produtos por lote | Dados copiados ou desestruturados |
 
-- cadastrar e editar produtos;
-- enviar imagens;
-- consultar e pesquisar o catálogo;
-- filtrar por categoria, tipo de pele e status;
-- acompanhar estoque;
-- desativar e reativar produtos.
+Os dois fluxos geram uma prévia e exigem confirmação humana. A IA organiza apenas informações presentes; ela não deve inventar preço, estoque, marca, descrição ou ativos.
 
-A exclusão utiliza soft delete: o produto permanece no banco, mas deixa de participar das recomendações.
+Um modelo de planilha está disponível em [`docs/modelo-catalogo.csv`](docs/modelo-catalogo.csv). Consulte também o [guia completo de importação](docs/IMPORTACAO_CATALOGO.md).
 
-## Tecnologias
+## Rotina e histórico demonstrativo
 
-### Backend
+O frontend apresenta uma **rotina de cuidados**, organizada por etapas:
 
-- Python;
-- FastAPI e Uvicorn;
-- Pydantic;
-- SQLite;
-- Google Gen AI SDK;
-- Pillow;
-- python-dotenv;
-- Pytest.
+1. limpeza;
+2. tratamento ou sérum;
+3. hidratação;
+4. proteção;
+5. outros cuidados, quando aplicável.
 
-### Frontend público
+O produto mais compatível de cada categoria recebe destaque, enquanto as alternativas permanecem disponíveis. O conjunto escolhido pelo usuário forma a sua rotina.
 
-- React;
-- TypeScript;
-- Vite;
-- Tailwind CSS;
-- Motion.
+O registro dessa rotina é apenas uma demonstração de integração:
 
-### Painel administrativo
+- não há pagamento, checkout ou dados de cartão;
+- nome, e-mail e itens são salvos somente após consentimento;
+- o backend consulta novamente os preços;
+- o identificador do navegador é armazenado somente como hash SHA-256;
+- os itens preservam nome, marca, imagem e preço do momento da seleção;
+- o usuário pode apagar todo o próprio histórico;
+- registros expiram automaticamente;
+- a retenção máxima é de 365 dias;
+- o estoque não é reduzido por padrão.
 
-- React;
-- TypeScript;
-- Vite;
-- Ant Design.
+E-commerce real, autenticação, cobrança, frete, nota fiscal e segurança financeira devem ser implementados em módulos próprios.
 
-### Hospedagem
+## Instalação local para desenvolvimento
 
-- frontend público na Vercel;
-- backend e volume persistente na Railway;
-- SQLite armazenado no volume da aplicação.
+### Pré-requisitos
 
-## Estrutura principal
+- Windows 10 ou 11;
+- Python 3.12 recomendado;
+- Node.js LTS;
+- Git e VS Code recomendados.
 
-```text
-analise-pele-V3/
-├── admin/                    # painel administrativo local
-├── frontend/                 # interface pública
-├── media/produtos/           # imagens do catálogo
-├── routers/
-│   ├── analise.py
-│   ├── geral.py
-│   ├── produtos.py
-│   └── recomendacoes.py
-├── tests/
-├── ai_service.py             # comunicação com o Gemini
-├── config.py                 # configuração por ambiente
-├── criar_banco.py
-├── database.py
-├── main.py
-├── models.py
-├── popular_catalogo.py       # carga automatizada do catálogo
-├── product_image_service.py  # processamento de imagens de produto
-├── services.py               # regras de recomendação
-├── railway.json
-├── requirements.txt
-└── README.md
+### 1. Clone o projeto
+
+```cmd
+git clone https://github.com/GabrielJalmeida/api-analise-pele.git
+cd api-analise-pele
 ```
 
-## Configuração local do backend
-
-Na raiz do projeto, crie e ative o ambiente virtual:
+### 2. Backend
 
 ```cmd
 python -m venv .venv
 .venv\Scripts\activate
-```
-
-Instale as dependências:
-
-```cmd
-python -m pip install -r requirements.txt
-```
-
-Para desenvolvimento e testes:
-
-```cmd
 python -m pip install -r requirements-dev.txt
-```
-
-Crie o arquivo local de configuração:
-
-```cmd
 copy .env.example .env
-```
-
-Exemplo:
-
-```env
-GEMINI_API_KEY=sua_chave_aqui
-GEMINI_MODEL=gemini-3.5-flash-lite
-APP_ENV=development
-DATABASE_PATH=produtos.db
-CORS_ORIGINS=http://localhost:5173
-```
-
-Nunca envie a chave real ao GitHub ou ao frontend.
-
-Crie o banco e, se desejar o catálogo de demonstração, execute:
-
-```cmd
 python criar_banco.py
-python popular_catalogo.py --aplicar
-```
-
-Inicie a API:
-
-```cmd
 uvicorn main:app --reload
 ```
 
 Endereços locais:
 
-- API: `http://127.0.0.1:8000`
-- Swagger: `http://127.0.0.1:8000/docs`
+- API: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+- Swagger: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
-## Configuração do frontend público
+O banco começa vazio. Para carregar exclusivamente o catálogo fictício da demonstração:
+
+```cmd
+python popular_catalogo.py --aplicar
+```
+
+### 3. Frontend público
+
+Em outro terminal:
 
 ```cmd
 cd frontend
@@ -260,19 +323,15 @@ copy .env.example .env
 npm run dev
 ```
 
-Configuração local:
+Configuração esperada:
 
 ```env
 VITE_API_URL=http://127.0.0.1:8000
 ```
 
-Build de produção:
+### 4. Painel no navegador
 
-```cmd
-npm run build
-```
-
-## Configuração do painel administrativo
+Em outro terminal, a partir da raiz:
 
 ```cmd
 cd admin
@@ -281,96 +340,292 @@ copy .env.example .env
 npm run dev
 ```
 
-Configuração local:
+Se site e painel forem iniciados juntos, o Vite normalmente usa as portas `5173` e `5174`. Use sempre o endereço exibido no terminal.
 
-```env
-VITE_API_URL=http://127.0.0.1:8000
+## Aplicativo Windows
+
+O aplicativo usa Tauri 2. O Skin Admin abre em uma janela própria e inicia silenciosamente uma API FastAPI empacotada com PyInstaller.
+
+Depois de instalado, o usuário final não precisa abrir terminal, navegador, Python ou Node.js.
+
+### Dados de cada instalação
+
+No primeiro uso, o aplicativo cria:
+
+```text
+%LOCALAPPDATA%\com.gabrielalmeida.skinadmin\
+├── config\.env
+├── data\produtos.db
+├── media\produtos\
+└── lumina-api.log
 ```
 
-O painel não deve ser disponibilizado publicamente antes da implementação de autenticação.
+O banco começa vazio. Cada instalação administra somente seus próprios dados e não modifica a demonstração pública.
+
+### Gerar o instalador no Windows
+
+O código-fonte não depende de uma chave de IA para ser compilado. Em um computador Windows com Python, Node.js, Rust/Cargo, Microsoft C++ Build Tools e WebView2:
+
+```cmd
+build_windows.bat
+```
+
+Saídas esperadas:
+
+```text
+dist\lumina-api.exe
+admin\src-tauri\target\release\bundle\nsis\*-setup.exe
+```
+
+Também existe o workflow manual **Build Skin Admin para Windows** em `.github/workflows/build-desktop-windows.yml`.
+
+> [!NOTE]
+> O instalador não possui certificado comercial de assinatura. O Windows SmartScreen pode exibir um aviso. Distribuições comerciais devem assinar o executável.
+
+Consulte o [guia detalhado do aplicativo desktop](docs/GUIA_DESKTOP.md).
+
+## Configuração do backend
+
+Exemplo completo:
+
+```env
+AI_PROVIDER=gemini
+
+GEMINI_API_KEY=
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+
+GEMINI_MODEL=gemini-3.5-flash-lite
+OPENAI_MODEL=gpt-5.6-luna
+ANTHROPIC_MODEL=claude-haiku-4-5-20251001
+
+APP_ENV=development
+DATABASE_PATH=
+LUMINA_DATA_DIR=
+MEDIA_PATH=
+PEDIDOS_ATUALIZAM_ESTOQUE=false
+CORS_ORIGINS=http://localhost:5173,http://localhost:5174
+```
+
+Nunca envie chaves reais ao GitHub, frontend ou arquivos de exemplo.
+
+### Ambientes
+
+| `APP_ENV` | Comportamento |
+|---|---|
+| `development` | Desenvolvimento local completo |
+| `desktop` | Aplicativo instalado com administração local habilitada |
+| `production` | Demonstração pública; rotas administrativas são ocultadas |
 
 ## Rotas principais
 
-```text
-GET    /
-GET    /status
+### Gerais e catálogo
 
-GET    /produto/{id_produto}
-GET    /produtos
-POST   /produto
-PATCH  /produto/{id_produto}
-DELETE /produto/{id_produto}
-POST   /produtos/imagem
+| Método | Rota | Finalidade |
+|---|---|---|
+| GET | `/` | Confirma funcionamento da API |
+| GET | `/status` | Retorna estado e versão |
+| GET | `/produtos` | Lista e filtra o catálogo |
+| GET | `/produto/{id_produto}` | Consulta um produto |
+| POST | `/produto` | Cadastra produto no ambiente administrativo |
+| PATCH | `/produto/{id_produto}` | Atualiza produto |
+| DELETE | `/produto/{id_produto}` | Desativa produto por soft delete |
+| POST | `/produtos/imagem` | Processa imagem de produto |
+| DELETE | `/produtos/imagem` | Remove imagem administrativa permitida |
 
-POST   /perfil-pele
-POST   /analise-texto
-POST   /analise-foto
-POST   /recomendacoes
+### Análise e recomendação
+
+| Método | Rota | Finalidade |
+|---|---|---|
+| POST | `/perfil-pele` | Valida perfil informado diretamente |
+| POST | `/analise-texto` | Interpreta descrição com IA |
+| POST | `/analise-foto` | Interpreta fotografia e texto opcional |
+| POST | `/recomendacoes` | Recomenda produtos para perfil conhecido |
+
+### Importação, histórico e configuração
+
+| Método | Rota | Finalidade |
+|---|---|---|
+| POST | `/produtos/importacao/arquivo` | Gera prévia de CSV/XLSX |
+| POST | `/produtos/importacao/ia` | Organiza texto e gera prévia |
+| POST | `/produtos/importacao/confirmar` | Confirma lote revisado |
+| POST | `/pedidos` | Registra seleção demonstrativa |
+| GET | `/pedidos/historico` | Consulta histórico do navegador |
+| DELETE | `/pedidos/historico` | Apaga histórico do navegador |
+| GET | `/admin/pedidos` | Consulta local no painel |
+| GET | `/admin/configuracao/ia` | Consulta configuração local sem devolver a chave |
+| PUT | `/admin/configuracao/ia` | Atualiza provedor, modelo e chave locais |
+
+As rotas administrativas respondem `404` quando `APP_ENV=production`.
+
+## Exemplo mínimo de integração
+
+```html
+<button id="analisar">Analisar perfil</button>
+<p id="resultado"></p>
+
+<script>
+  const API_URL = "http://127.0.0.1:8000";
+
+  document.querySelector("#analisar").addEventListener("click", async () => {
+    const resposta = await fetch(`${API_URL}/recomendacoes`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        tipo_pele: "oleosa",
+        sensivel: true,
+        tem_espinha: true
+      })
+    });
+
+    const dados = await resposta.json();
+
+    document.querySelector("#resultado").textContent =
+      `${dados.total_recomendacoes} produtos encontrados`;
+  });
+</script>
 ```
 
-As rotas administrativas de escrita permanecem disponíveis no desenvolvimento local e são ocultadas no ambiente público da v3.8.0.
+O [Tutorial 2](docs/Tutoriais-API-Analise-de-Pele.zip) contém uma integração maior e funcional com perfil, texto, fotografia, carregamento, erros e apresentação de produtos.
 
-## Testes e builds
+## Testes e validação
 
-Checkpoint da v3.8.0:
-
-```text
-Backend:          35 testes aprovados
-Frontend público: build aprovado
-Admin:            build aprovado
-```
-
-Execute a suíte do backend com:
+### Backend
 
 ```cmd
 python -m pytest -q
+python -m compileall -q .
 ```
 
-Os testes usam banco temporário e respostas simuladas da IA, portanto não consomem chave nem quota do Gemini.
+Resultado final: **62 testes aprovados**.
 
-Existem dois avisos externos conhecidos relacionados ao TestClient/HTTPX e ao Google Gen AI SDK. Eles não impedem a execução dos testes.
+### Frontend público
 
-## Variáveis utilizadas em produção
-
-Backend:
-
-```env
-APP_ENV=production
-DATABASE_PATH=/data/produtos.db
-GEMINI_API_KEY=chave_configurada_no_servidor
-GEMINI_MODEL=gemini-3.5-flash-lite
-CORS_ORIGINS=https://lumina-skin-lyart.vercel.app
+```cmd
+cd frontend
+npm ci
+npm run lint
+npm run build
 ```
 
-Frontend:
+### Painel
 
-```env
-VITE_API_URL=https://api-production-f6fd.up.railway.app
+```cmd
+cd admin
+npm ci
+npm run lint
+npm run build
+npm run build:desktop
 ```
 
-## Limites conhecidos desta versão
+Na validação final:
 
-A v3.8.0 é uma versão funcional para demonstração acadêmica e portfólio. Permanecem planejados para a auditoria técnica da V4:
+- módulos Python compilados;
+- 62 testes aprovados;
+- lint do frontend aprovado;
+- build do frontend aprovado;
+- lint do painel aprovado;
+- builds web e desktop do painel aprovados;
+- API empacotada iniciada com banco vazio e integridade SQLite confirmada;
+- configuração Tauri, sidecar e workflow Windows revisados.
 
-- autenticação e autorização do painel administrativo;
-- tratamento automático de imagens órfãs;
-- auditoria de instalação limpa e dependências;
-- observabilidade e tratamento ampliado de falhas transitórias de rede;
-- revisão da persistência e dos uploads para produção;
-- otimização do bundle do painel;
-- revisão completa de segurança e documentação.
+O relatório reproduzível está em [`docs/RELATORIO_VALIDACAO.md`](docs/RELATORIO_VALIDACAO.md).
 
-Em hospedagens gratuitas, reinicializações e oscilações ocasionais de rede podem exigir uma nova tentativa da solicitação.
+## Deploy de uma instância própria
 
-## Evolução do projeto
+A hospedagem da Lumina é apenas demonstração. Para usar a API em outro projeto:
 
-- **V1** — API e regras iniciais de recomendação;
-- **V2** — integração com IA, estabilização do backend e painel administrativo;
-- **V3.0 alpha** — preparação da arquitetura para a experiência pública;
-- **V3.8.0** — frontend público, catálogo visual completo e aplicação hospedada;
-- **V4** — auditoria técnica e endurecimento para uso externo;
-- **V5** — melhorias orientadas por feedback e finalização.
+1. hospede o backend em um serviço compatível com FastAPI;
+2. configure um volume persistente para SQLite e imagens;
+3. coloque a chave de IA somente nas variáveis do servidor;
+4. defina `APP_ENV=production`;
+5. informe em `CORS_ORIGINS` somente os domínios autorizados;
+6. aponte `VITE_API_URL` do frontend para o endereço HTTPS da API;
+7. não publique o painel administrativo sem autenticação e autorização.
 
-## Objetivo
+Para tráfego, catálogo ou equipe maiores, considere substituir:
 
-Além de seu contexto acadêmico, o projeto demonstra a integração entre frontend, API, banco de dados, inteligência artificial, processamento de imagens, regras de negócio e testes automatizados, sem delegar toda a decisão do sistema à IA.
+- SQLite por PostgreSQL ou outro banco de servidor;
+- arquivos locais por armazenamento de objetos;
+- administração local por painel autenticado com controle de permissões.
+
+A interface HTTP permite essa evolução sem obrigar o uso do frontend Lumina.
+
+## Privacidade, segurança e limites
+
+- fotografias de análise são processadas em memória e não são armazenadas pela aplicação;
+- a fotografia é enviada ao provedor de IA escolhido;
+- resultados de IA são probabilísticos;
+- o histórico demonstrativo contém dados pessoais e exige consentimento;
+- retenção automática não substitui política de privacidade adequada ao país e ao negócio;
+- chaves de IA pertencem exclusivamente ao backend;
+- o painel web não deve ser publicado sem autenticação;
+- não existem pagamentos, prontuário médico ou segurança financeira;
+- a API deve receber monitoramento, backups e infraestrutura adequados antes de uso comercial.
+
+Leia [Privacidade e Limites](docs/PRIVACIDADE_E_LIMITES.md) e [Decisões de Arquitetura](docs/DECISOES_ARQUITETURA.md).
+
+## Estrutura do repositório
+
+```text
+api-analise-pele/
+├── admin/                         # painel React e aplicativo Tauri
+│   └── src-tauri/                 # instalador e sidecar Windows
+├── frontend/                      # demonstração pública Lumina
+├── media/produtos/                # acervo fictício opcional
+├── routers/                       # rotas FastAPI
+├── tests/                         # suíte automatizada
+├── docs/                          # guias, relatório e tutoriais
+├── .github/workflows/             # build manual do aplicativo Windows
+├── ai_providers.py                # Gemini, OpenAI e Claude
+├── ai_service.py                  # contratos e prompts de análise
+├── catalog_import_service.py      # CSV e XLSX
+├── catalog_ai_service.py          # organização de texto com IA
+├── order_service.py               # histórico e retenção
+├── product_image_service.py       # processamento de imagens
+├── desktop_api.py                 # entrada da API empacotada
+├── desktop_api.spec               # configuração PyInstaller
+├── build_windows.bat              # build completo do instalador
+├── main.py                        # aplicação FastAPI
+└── README.md
+```
+
+## Documentação complementar
+
+- [Guia do aplicativo desktop](docs/GUIA_DESKTOP.md)
+- [Importação de catálogo](docs/IMPORTACAO_CATALOGO.md)
+- [Privacidade e limites](docs/PRIVACIDADE_E_LIMITES.md)
+- [Decisões de arquitetura](docs/DECISOES_ARQUITETURA.md)
+- [Relatório de validação](docs/RELATORIO_VALIDACAO.md)
+- [Histórico de mudanças](CHANGELOG.md)
+- [Pacote de tutoriais visuais](docs/Tutoriais-API-Analise-de-Pele.zip)
+
+## Histórico de versões
+
+- **V1:** API e regras iniciais de recomendação;
+- **V2:** integração com IA, testes e estabilização do backend;
+- **V3:** frontend público, painel, catálogo visual e deploy;
+- **v3.9.0:** marco final preservado da demonstração Lumina;
+- **Versão X:** edição especial consolidada com IA multiprovedor, rotina personalizada, histórico demonstrativo, importação em lote e aplicativo Windows.
+
+## Escopo final
+
+Este repositório entrega uma base completa para demonstrar e reutilizar:
+
+- integração entre frontend e API;
+- inteligência artificial com saída estruturada;
+- visão computacional aplicada a um fluxo cosmético;
+- recomendação por regras de negócio;
+- catálogo e imagens administráveis;
+- importação em lote;
+- persistência e retenção de histórico;
+- aplicação desktop com backend local;
+- testes automatizados e documentação de entrega.
+
+Quem reutilizar o projeto pode manter somente a API, trocar a interface, alterar o catálogo, escolher outro provedor, hospedar em outra infraestrutura e implementar os módulos comerciais necessários.
+
+---
+
+Desenvolvido por **Gabriel Almeida** como projeto acadêmico e de portfólio.
+
+Repositório: [github.com/GabrielJalmeida/api-analise-pele](https://github.com/GabrielJalmeida/api-analise-pele)

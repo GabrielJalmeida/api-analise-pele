@@ -5,6 +5,7 @@
 
 # Python
 .venv/
+.venv-build/
 __pycache__/
 *.py[cod]
 .pytest_cache/
@@ -16,7 +17,14 @@ __pycache__/
 
 # Node / React / Vite
 node_modules/
+/admin/node_modules
+/frontend/node_modules
 dist/
+build/
+
+# Dados persistentes gerados pelo aplicativo desktop
+data/
+config/.env
 
 # Logs
 *.log

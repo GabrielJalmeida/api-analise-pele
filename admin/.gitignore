@@ -17,6 +17,8 @@ __pycache__/
 # Node / React / Vite
 node_modules/
 dist/
+src-tauri/target/
+src-tauri/binaries/*.exe
 
 # Logs
 *.log

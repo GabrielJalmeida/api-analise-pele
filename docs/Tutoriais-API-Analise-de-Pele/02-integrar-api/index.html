@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Tutorial para iniciantes integrarem a API de análise de pele a um sistema próprio com HTML, CSS e JavaScript.">
+  <title>Tutorial 2 — Integrar a API ao seu sistema</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-api" data-tutorial="integrar-api">
+  <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+  <div class="reading-progress" aria-hidden="true"><span data-reading-progress></span></div>
+
+  <div class="page">
+    <aside class="sidebar" aria-label="Navegação do tutorial">
+      <a class="back-link" href="../LEIA-ME.html">← Todos os tutoriais</a>
+      <div class="brand">
+        <span class="brand-mark">{ }</span>
+        <strong>Integração da API</strong>
+        <span>Do primeiro fetch ao deploy</span>
+      </div>
+      <p class="toc-title">Neste guia</p>
+      <nav class="toc">
+        <a href="#visao-geral">O que acontece</a>
+        <a href="#endereco">1. Onde a API roda</a>
+        <a href="#seguranca">2. Chaves e CORS</a>
+        <a href="#primeira-chamada">3. Primeiro botão</a>
+        <a href="#rotas">4. Análises</a>
+        <a href="#exemplo">5. Exemplo pronto</a>
+        <a href="#hospedar">6. Publicar</a>
+        <a href="#decidir">Comparação</a>
+        <a href="#problemas">Erros comuns</a>
+      </nav>
+      <div class="sidebar-actions">
+        <button type="button" data-print>Imprimir / PDF</button>
+        <button type="button" data-reset-checks>Limpar progresso</button>
+      </div>
+    </aside>
+
+    <main class="content" id="conteudo">
+      <section class="hero" id="visao-geral">
+        <div class="hero-copy">
+          <span class="eyebrow">Tutorial 02 • Integração para iniciantes</span>
+          <h1>Use a API no <em>seu próprio sistema.</em></h1>
+          <p>Você não precisa usar o site Lumina. Qualquer interface capaz de enviar uma requisição HTTP pode pedir uma análise e exibir a resposta.</p>
+          <div class="hero-meta">
+            <span class="pill">HTML + CSS + JavaScript</span>
+            <span class="pill">Local ou hospedado</span>
+            <span class="pill">Exemplo incluído</span>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <img src="assets/fluxo-api.svg" alt="Fluxo entre um site, a API e os serviços usados pelo backend">
+        </div>
+      </section>
+
+      <div class="start-card">
+        <span class="icon" aria-hidden="true">→</span>
+        <div><strong>Ideia principal</strong><span>Seu botão envia dados; a API devolve JSON; seu JavaScript transforma esse JSON em interface.</span></div>
+        <a href="#endereco">Entender o fluxo</a>
+      </div>
+
+      <section class="chapter">
+        <header class="chapter-head">
+          <span class="chapter-number">00</span>
+          <div><h2>API sem mistério</h2><p>Quatro palavras bastam para entender a comunicação.</p></div>
+        </header>
+
+        <div class="flow-strip">
+          <div class="flow-item"><strong>1. Endereço</strong><span>Ex.: <code>http://127.0.0.1:8000</code>.</span></div>
+          <div class="flow-item"><strong>2. Rota</strong><span>Ex.: <code>/analise-texto</code>.</span></div>
+          <div class="flow-item"><strong>3. Requisição</strong><span>Seu JavaScript envia texto, perfil ou foto.</span></div>
+        </div>
+        <div class="callout"><strong>Resposta:</strong> a API devolve um texto estruturado em JSON. Em vez de mostrar o JSON cru, seu site lê campos como <code>perfil.tipo_pele</code> e <code>recomendacoes</code> para criar títulos, cartões e mensagens.</div>
+
+        <div class="two-col">
+          <article class="info-card"><span class="mini-icon">F</span><h3>Frontend</h3><p>É o que a pessoa vê. Contém botões, formulários e a variável com o endereço público da API. <strong>Não contém chave de IA.</strong></p></article>
+          <article class="info-card"><span class="mini-icon">B</span><h3>Backend / API</h3><p>Valida os dados, protege as chaves, chama o provedor de IA, consulta os produtos e monta a resposta.</p></article>
+        </div>
+      </section>
+
+      <section class="chapter" id="endereco">
+        <header class="chapter-head">
+          <span class="chapter-number">01</span>
+          <div><h2>Escolha onde a API vai rodar</h2><p>O código do botão é quase igual. O que muda é o endereço.</p></div>
+        </header>
+
+        <figure class="visual">
+          <img src="assets/local-hospedado.svg" alt="Comparação visual entre uma API local e uma API hospedada">
+          <figcaption><code>127.0.0.1</code> sempre significa “este computador”. Um endereço público HTTPS aponta para o servidor hospedado.</figcaption>
+        </figure>
+
+        <div class="tabs" data-tabs>
+          <div class="tab-list" role="tablist" aria-label="Escolha do ambiente">
+            <button class="tab-button" role="tab" aria-selected="true" aria-controls="modo-local" id="botao-local" data-api-choice="http://127.0.0.1:8000">No meu computador</button>
+            <button class="tab-button" role="tab" aria-selected="false" aria-controls="modo-hospedado" id="botao-hospedado" data-api-choice="https://api-production-f6fd.up.railway.app">API hospedada</button>
+          </div>
+          <div class="tab-panel" role="tabpanel" id="modo-local" aria-labelledby="botao-local">
+            <p>Use enquanto desenvolve. Inicie o backend com <code>uvicorn main:app --reload</code>. O endereço será:</p>
+            <div class="code-block"><div class="code-head"><span>JavaScript</span><button class="copy-button" type="button">Copiar</button></div><pre><code>const API_URL = 'http://127.0.0.1:8000';</code></pre></div>
+            <p>Somente aplicações no mesmo computador conseguem usar esse endereço. Se você enviar o seu HTML para outra pessoa, o navegador dela procurará a API no computador <em>dela</em>.</p>
+          </div>
+          <div class="tab-panel" role="tabpanel" id="modo-hospedado" aria-labelledby="botao-hospedado" hidden>
+            <p>Use um domínio HTTPS do backend. A demonstração pública atual usa:</p>
+            <div class="code-block"><div class="code-head"><span>JavaScript</span><button class="copy-button" type="button">Copiar</button></div><pre><code>const API_URL = 'https://api-production-f6fd.up.railway.app';</code></pre></div>
+            <p>Para um projeto real, substitua pelo endereço da sua própria hospedagem, banco e catálogo.</p>
+          </div>
+        </div>
+
+        <div class="callout warning"><strong>Um site HTTPS não deve chamar uma API HTTP.</strong> O navegador costuma bloquear essa mistura por segurança. Se o frontend está publicado com HTTPS, publique também a API com HTTPS.</div>
+        <label class="check-item"><input type="checkbox" data-check-id="ambiente"><span>Escolhi se vou desenvolver com API local ou usar uma API hospedada.</span></label>
+      </section>
+
+      <section class="chapter" id="seguranca">
+        <header class="chapter-head">
+          <span class="chapter-number">02</span>
+          <div><h2>Configure chaves sem expô-las</h2><p>Seu frontend conhece o endereço da API; somente o backend conhece a chave do provedor.</p></div>
+        </header>
+
+        <figure class="visual">
+          <img src="assets/chave-segura.svg" alt="Diagrama mostrando que a chave de IA fica no arquivo privado do backend">
+          <figcaption>Qualquer variável escrita em JavaScript entregue ao navegador pode ser vista pelo visitante. A chave nunca pertence ali.</figcaption>
+        </figure>
+
+        <h3>Versão X: escolha um provedor</h3>
+        <p>No arquivo <code>.env</code> do backend, defina <code>AI_PROVIDER</code> e preencha somente a chave escolhida. Os modelos abaixo são os padrões incluídos no projeto:</p>
+
+        <div class="tabs" data-tabs>
+          <div class="tab-list" role="tablist" aria-label="Provedores de inteligência artificial">
+            <button class="tab-button" role="tab" aria-selected="true" aria-controls="provider-gemini" id="tab-gemini">Gemini</button>
+            <button class="tab-button" role="tab" aria-selected="false" aria-controls="provider-openai" id="tab-openai">OpenAI</button>
+            <button class="tab-button" role="tab" aria-selected="false" aria-controls="provider-claude" id="tab-claude">Claude</button>
+          </div>
+          <div class="tab-panel" role="tabpanel" id="provider-gemini" aria-labelledby="tab-gemini">
+            <div class="code-block"><div class="code-head"><span>backend\.env</span><button class="copy-button" type="button">Copiar</button></div><pre><code>AI_PROVIDER=gemini
+GEMINI_API_KEY=sua_chave_aqui
+GEMINI_MODEL=gemini-3.5-flash-lite</code></pre></div>
+          </div>
+          <div class="tab-panel" role="tabpanel" id="provider-openai" aria-labelledby="tab-openai" hidden>
+            <div class="code-block"><div class="code-head"><span>backend\.env</span><button class="copy-button" type="button">Copiar</button></div><pre><code>AI_PROVIDER=openai
+OPENAI_API_KEY=sua_chave_aqui
+OPENAI_MODEL=gpt-5.6-luna</code></pre></div>
+          </div>
+          <div class="tab-panel" role="tabpanel" id="provider-claude" aria-labelledby="tab-claude" hidden>
+            <div class="code-block"><div class="code-head"><span>backend\.env</span><button class="copy-button" type="button">Copiar</button></div><pre><code>AI_PROVIDER=anthropic
+ANTHROPIC_API_KEY=sua_chave_aqui
+ANTHROPIC_MODEL=claude-haiku-4-5-20251001</code></pre></div>
+          </div>
+        </div>
+
+        <p>A v3.9.0 preservada utiliza a configuração Gemini. O suporte multiprovedor completo faz parte da Versão X. Em qualquer edição, o perfil manual e as recomendações já conhecidas funcionam sem chave; foto e texto dependem do provedor ativo.</p>
+
+        <h3>Autorize o endereço do seu site</h3>
+        <p>CORS é a lista de sites que podem chamar a API pelo navegador. Para o exemplo deste pacote, servido na porta 5500:</p>
+        <div class="code-block"><div class="code-head"><span>backend\.env</span><button class="copy-button" type="button">Copiar</button></div><pre><code>CORS_ORIGINS=http://localhost:5500</code></pre></div>
+        <p>Em produção, use o domínio real, sem barra final:</p>
+        <div class="code-block"><div class="code-head"><span>backend\.env</span><button class="copy-button" type="button">Copiar</button></div><pre><code>CORS_ORIGINS=https://www.seusite.com.br</code></pre></div>
+
+        <div class="callout danger"><strong>Não use <code>*</code> por comodidade em uma aplicação real.</strong> Autorize apenas as origens necessárias e reinicie o backend depois de alterar o <code>.env</code>.</div>
+        <label class="check-item"><input type="checkbox" data-check-id="chave"><span>Coloquei a chave somente no backend e não em arquivos enviados ao navegador.</span></label>
+        <label class="check-item"><input type="checkbox" data-check-id="cors"><span>Incluí a origem exata do meu frontend em <code>CORS_ORIGINS</code>.</span></label>
+      </section>
+
+      <section class="chapter" id="primeira-chamada">
+        <header class="chapter-head">
+          <span class="chapter-number">03</span>
+          <div><h2>Crie seu primeiro botão</h2><p>Começaremos pelo perfil manual, porque ele testa a integração sem depender da IA.</p></div>
+        </header>
+
+        <h3>1. O HTML cria a interface</h3>
+        <div class="code-block"><div class="code-head"><span>index.html</span><button class="copy-button" type="button">Copiar</button></div><pre><code>&lt;button id="recomendar"&gt;Ver recomendações&lt;/button&gt;
+&lt;section id="resultado" aria-live="polite"&gt;&lt;/section&gt;
+
+&lt;script src="app.js"&gt;&lt;/script&gt;</code></pre></div>
+
+        <h3>2. O JavaScript envia o perfil</h3>
+        <div class="code-block"><div class="code-head"><span>app.js</span><button class="copy-button" type="button">Copiar</button></div><pre><code>const API_URL = 'http://127.0.0.1:8000';
+
+document.querySelector('#recomendar').addEventListener('click', async () =&gt; {
+  const resposta = await fetch(`${API_URL}/recomendacoes`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      tipo_pele: 'oleosa',
+      sensivel: true,
+      tem_espinha: true
+    })
+  });
+
+  const dados = await resposta.json();
+  document.querySelector('#resultado').textContent =
+    `Foram encontrados ${dados.total_recomendacoes} produtos.`;
+});</code></pre></div>
+
+        <div class="two-col">
+          <article class="info-card"><span class="mini-icon">P</span><h3><code>POST</code></h3><p>Indica que você está enviando dados para processamento. Não é o mesmo que simplesmente abrir um endereço.</p></article>
+          <article class="info-card"><span class="mini-icon">J</span><h3><code>JSON.stringify</code></h3><p>Transforma o objeto JavaScript no formato de texto que a API espera no corpo da requisição.</p></article>
+        </div>
+
+        <div class="callout"><strong>Não pare no exemplo curto.</strong> Em produção, verifique <code>resposta.ok</code>, trate erros e desabilite o botão enquanto aguarda. O projeto funcional incluído neste pacote já demonstra essas proteções.</div>
+        <label class="check-item"><input type="checkbox" data-check-id="fetch"><span>Entendi que o clique chama <code>fetch</code>, envia JSON e aguarda a resposta.</span></label>
+      </section>
+
+      <section class="chapter" id="rotas">
+        <header class="chapter-head">
+          <span class="chapter-number">04</span>
+          <div><h2>Use cada tipo de análise</h2><p>Texto e perfil usam JSON. Foto usa <code>FormData</code>, próprio para arquivos.</p></div>
+        </header>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Objetivo</th><th>Rota</th><th>Formato enviado</th><th>Usa IA?</th></tr></thead>
+            <tbody>
+              <tr><td>Perfil conhecido</td><td><code>POST /recomendacoes</code></td><td>JSON com tipo, sensibilidade e espinhas</td><td>Não</td></tr>
+              <tr><td>Descrição livre</td><td><code>POST /analise-texto</code></td><td>JSON com <code>texto</code></td><td>Sim</td></tr>
+              <tr><td>Fotografia</td><td><code>POST /analise-foto</code></td><td>FormData com <code>arquivo</code> e texto opcional</td><td>Sim</td></tr>
+              <tr><td>Catálogo</td><td><code>GET /produtos</code></td><td>Nenhum corpo</td><td>Não</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Análise por texto</h3>
+        <div class="code-block"><div class="code-head"><span>JavaScript</span><button class="copy-button" type="button">Copiar</button></div><pre><code>const resposta = await fetch(`${API_URL}/analise-texto`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    texto: 'Minha pele fica oleosa ao longo do dia e tenho espinhas frequentes.'
+  })
+});
+
+const dados = await resposta.json();</code></pre></div>
+
+        <h3>Análise por foto</h3>
+        <div class="code-block"><div class="code-head"><span>HTML + JavaScript</span><button class="copy-button" type="button">Copiar</button></div><pre><code>&lt;input id="foto" type="file" accept="image/jpeg,image/png,image/webp"&gt;
+
+const formulario = new FormData();
+formulario.append('arquivo', document.querySelector('#foto').files[0]);
+formulario.append('texto', 'Minha testa costuma ficar oleosa.'); // opcional
+
+const resposta = await fetch(`${API_URL}/analise-foto`, {
+  method: 'POST',
+  body: formulario
+});
+
+const dados = await resposta.json();</code></pre></div>
+
+        <div class="callout warning"><strong>Não defina manualmente o cabeçalho <code>Content-Type</code> ao enviar <code>FormData</code>.</strong> O navegador precisa criar sozinho o separador do arquivo. A foto deve ser JPG, PNG ou WEBP, até 5 MB.</div>
+
+        <h3>A resposta pode ter estados diferentes</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Estado</th><th>O que sua interface deve fazer</th></tr></thead>
+            <tbody>
+              <tr><td><code>sucesso</code> ou resposta com recomendações</td><td>Mostrar perfil e produtos, agrupados por categoria.</td></tr>
+              <tr><td><code>informacoes_insuficientes</code></td><td>Pedir uma descrição melhor ou uma foto mais ampla.</td></tr>
+              <tr><td><code>fora_escopo</code></td><td>Explicar que a ferramenta analisa apenas pele humana em contexto cosmético.</td></tr>
+              <tr><td><code>imagem_inadequada</code></td><td>Mostrar a orientação recebida e manter a opção de escolher outra foto.</td></tr>
+              <tr><td><code>confirmacao_necessaria</code></td><td>Pedir ao usuário que confirme o tipo; depois chamar <code>/recomendacoes</code>, sem enviar a foto novamente.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="fine-print">Nunca apresente a análise como diagnóstico. Foto e texto são entradas opcionais e independentes; a experiência do seu frontend decide qual destacar.</p>
+      </section>
+
+      <section class="chapter" id="exemplo">
+        <header class="chapter-head">
+          <span class="chapter-number">05</span>
+          <div><h2>Abra o exemplo funcional</h2><p>O pacote contém uma página pequena com perfil manual, texto, foto e resposta visual.</p></div>
+        </header>
+
+        <div class="two-col">
+          <article class="info-card">
+            <span class="mini-icon">1</span>
+            <h3>Inicie a API</h3>
+            <div class="code-block"><div class="code-head"><span>Raiz da API</span><button class="copy-button" type="button">Copiar</button></div><pre><code>.venv\Scripts\activate
+uvicorn main:app --reload</code></pre></div>
+          </article>
+          <article class="info-card">
+            <span class="mini-icon">2</span>
+            <h3>Sirva o exemplo</h3>
+            <div class="code-block"><div class="code-head"><span>Pasta exemplo-integracao</span><button class="copy-button" type="button">Copiar</button></div><pre><code>python -m http.server 5500</code></pre></div>
+          </article>
+        </div>
+
+        <p>Depois, abra <a href="http://localhost:5500">http://localhost:5500</a>. O exemplo começa usando <code>http://127.0.0.1:8000</code>, mas há um campo para trocar o endereço.</p>
+
+        <div class="button-row">
+          <a class="button" href="exemplo-integracao/index.html">Abrir arquivos do exemplo</a>
+          <a class="button secondary" href="https://api-production-f6fd.up.railway.app/docs">Explorar a API pública</a>
+        </div>
+
+        <div class="callout"><strong>Por que não basta dar dois cliques no exemplo?</strong> O tutorial pode ser lido como arquivo local, mas uma integração real deve ter uma origem web. O servidor simples da porta 5500 reproduz isso e permite configurar CORS corretamente.</div>
+        <label class="check-item"><input type="checkbox" data-check-id="demo"><span>Abri o exemplo pela porta 5500 e consegui executar o perfil manual.</span></label>
+      </section>
+
+      <section class="chapter" id="hospedar">
+        <header class="chapter-head">
+          <span class="chapter-number">06</span>
+          <div><h2>Leve sua integração para a internet</h2><p>Hospedar o frontend e hospedar a API são duas tarefas separadas.</p></div>
+        </header>
+
+        <div class="step-list">
+          <article class="step"><span class="step-num">1</span><h3>Publique sua própria API</h3><p>Envie o repositório para um serviço compatível com Python/FastAPI. O processo inicia normalmente com <code>uvicorn main:app --host 0.0.0.0 --port %PORT%</code> ou com o comando definido pelo provedor.</p></article>
+          <article class="step"><span class="step-num">2</span><h3>Crie variáveis no servidor</h3><p>Cadastre <code>AI_PROVIDER</code>, a chave do provedor ativo, o modelo, <code>APP_ENV=production</code>, o caminho persistente do banco e <code>CORS_ORIGINS</code>. Não envie o seu <code>.env</code ao Git.</p></article>
+          <article class="step"><span class="step-num">3</span><h3>Use armazenamento persistente</h3><p>O SQLite e as imagens não podem ficar apenas no disco temporário do deploy. Configure volume persistente; para tráfego maior, considere banco de servidor e armazenamento de objetos.</p></article>
+          <article class="step"><span class="step-num">4</span><h3>Aponte seu frontend</h3><p>Troque <code>API_URL</code> pelo domínio HTTPS publicado. Em Vite, use <code>VITE_API_URL</code>; em HTML simples, altere a constante ou o campo de configuração do exemplo.</p></article>
+          <article class="step"><span class="step-num">5</span><h3>Teste como visitante</h3><p>Abra em aba anônima e em outro celular. Teste <code>/status</code>, perfil manual, texto e foto. Observe o console do navegador e os logs do backend se algo falhar.</p></article>
+        </div>
+
+        <div class="callout danger"><strong>Rotas administrativas:</strong> na Versão X elas são ocultadas quando <code>APP_ENV=production</code>. Não as exponha simplesmente para colocar o painel na internet; primeiro implemente autenticação e autorização.</div>
+        <label class="check-item"><input type="checkbox" data-check-id="deploy"><span>Se for publicar, planejei domínio HTTPS, CORS, variáveis secretas e persistência de dados.</span></label>
+      </section>
+
+      <section class="chapter" id="decidir">
+        <header class="chapter-head">
+          <span class="chapter-number">±</span>
+          <div><h2>Local ou hospedado?</h2><p>A melhor opção depende de quem precisa acessar.</p></div>
+        </header>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Cenário</th><th>Facilidades</th><th>Dificuldades</th><th>Quando escolher</th></tr></thead>
+            <tbody>
+              <tr><td><strong>API local</strong></td><td>Grátis, dados no PC, logs fáceis, mudanças imediatas.</td><td>PC e terminal precisam ficar ligados; não serve visitantes externos; endereço muda em rede.</td><td>Aprendizado, desenvolvimento, painel local e testes.</td></tr>
+              <tr><td><strong>API hospedada gratuita</strong></td><td>Link público, demonstração acessível de qualquer lugar, deploy simples.</td><td>Pode dormir, ficar lenta, limitar uso e exigir volume persistente.</td><td>Portfólio, TCC e demonstrações moderadas.</td></tr>
+              <tr><td><strong>API hospedada paga</strong></td><td>Mais estabilidade, recursos, métricas e capacidade.</td><td>Custo, configuração e responsabilidade operacional.</td><td>Uso real, tráfego previsível e compromisso de disponibilidade.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="progress-card">
+          <div class="progress-row"><strong>Seu progresso neste guia</strong><span data-check-progress-text>0 etapas</span></div>
+          <div class="progress-track"><span data-check-progress></span></div>
+        </div>
+      </section>
+
+      <section class="chapter" id="problemas">
+        <header class="chapter-head">
+          <span class="chapter-number">?</span>
+          <div><h2>Diagnóstico rápido</h2><p>Descubra se a falha está no navegador, na API ou no provedor de IA.</p></div>
+        </header>
+
+        <div class="accordion">
+          <details><summary>“Failed to fetch” ou “Não foi possível conectar”</summary><div>Abra <code>API_URL/status</code> diretamente. Se não responder, a API está desligada ou o endereço está errado. Se responder, confira CORS, HTTPS e o console do navegador.</div></details>
+          <details><summary>Erro de CORS no console</summary><div>Inclua a origem exata do frontend em <code>CORS_ORIGINS</code>. Protocolo, domínio e porta fazem parte da origem: <code>http://localhost:5500</code> é diferente de <code>http://localhost:5173</code>.</div></details>
+          <details><summary>HTTP 422</summary><div>O corpo não corresponde ao modelo esperado. Veja o campo <code>detail</code> da resposta. Texto exige ao menos 10 caracteres úteis; nomes de campos e tipos precisam estar corretos.</div></details>
+          <details><summary>HTTP 413 ou 415 na fotografia</summary><div>413 significa arquivo/dimensões acima do limite. 415 significa formato não aceito ou arquivo que não é realmente uma imagem. Use JPG, PNG ou WEBP até 5 MB.</div></details>
+          <details><summary>HTTP 503 ou falha apenas nas rotas de IA</summary><div>Perfil manual funcionar e texto/foto falharem costuma apontar para chave ausente, inválida, limite de quota, modelo ou instabilidade do provedor. Verifique os logs do backend.</div></details>
+          <details><summary>A requisição responde, mas não há produtos</summary><div>A integração está funcionando. Verifique o catálogo: produtos recomendáveis precisam estar ativos, com estoque maior que zero e compatíveis com o perfil.</div></details>
+          <details><summary>Funciona localmente, mas não depois do deploy</summary><div>Confirme que o frontend não continua apontando para <code>127.0.0.1</code>, que a API usa HTTPS, que CORS contém o domínio publicado e que as variáveis foram definidas no serviço de hospedagem.</div></details>
+        </div>
+      </section>
+
+      <section class="chapter">
+        <header class="chapter-head">
+          <span class="chapter-number">✓</span>
+          <div><h2>Critérios de integração pronta</h2><p>Você terminou quando consegue responder “sim” a estes itens.</p></div>
+        </header>
+        <div class="checklist">
+          <label class="check-item"><input type="checkbox" data-check-id="status-final"><span><code>GET /status</code> responde no ambiente escolhido.</span></label>
+          <label class="check-item"><input type="checkbox" data-check-id="manual-final"><span>Perfil manual devolve recomendações e meu frontend consegue apresentá-las.</span></label>
+          <label class="check-item"><input type="checkbox" data-check-id="errors-final"><span>Minha interface mostra carregamento, sucesso e erro sem travar.</span></label>
+          <label class="check-item"><input type="checkbox" data-check-id="privacy-final"><span>Nenhuma chave aparece no navegador e expliquei o uso de fotos/dados ao usuário.</span></label>
+        </div>
+      </section>
+
+      <footer class="site-footer">
+        <span>Tutorial 2 • Integração da API de Análise de Pele</span>
+        <span>Use a API como base; marca, interface e hospedagem podem ser suas.</span>
+      </footer>
+    </main>
+  </div>
+
+  <div class="toast" data-toast role="status" aria-live="polite"></div>
+  <script src="script.js"></script>
+</body>
+</html>

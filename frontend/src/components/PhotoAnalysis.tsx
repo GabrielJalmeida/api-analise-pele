@@ -13,6 +13,7 @@ import { motion } from 'motion/react'
 import {
   analisarFoto,
   ErroApi,
+  prepararServico,
 } from '../services/api'
 
 import type {
@@ -149,6 +150,10 @@ function PhotoAnalysis({
 
     setErro(null)
     setArquivo(arquivoSelecionado)
+
+    // Antecipamos o despertar de hospedagens gratuitas
+    // enquanto a pessoa revisa a foto escolhida.
+    void prepararServico().catch(() => undefined)
   }
 
   function removerArquivo() {

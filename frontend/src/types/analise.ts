@@ -109,7 +109,7 @@ export interface ResultadoAnaliseFoto {
   imagem_adequada: boolean
 
   tipo_pele: TipoPele | null
-    confianca_tipo_pele:
+  confianca_tipo_pele:
     | ConfiancaTipoPele
     | null
   tem_espinha: boolean | null
@@ -156,3 +156,37 @@ export type RespostaAnaliseFoto =
   | RespostaAnaliseFotoInadequada
   | RespostaAnaliseFotoInsuficiente
   | RespostaAnaliseFotoConfirmacao
+
+export interface ItemPedido {
+  produto_id: number | null
+  nome_produto: string
+  marca: string
+  imagem_url: string
+  preco_unitario: number
+  quantidade: number
+  subtotal: number
+}
+
+export interface Pedido {
+  codigo: string
+  cliente_nome: string
+  cliente_email: string
+  total: number
+  status: 'registrado' | 'cancelado'
+  criado_em: string
+  expira_em: string
+  modo: 'demonstracao'
+  itens: ItemPedido[]
+}
+
+export interface RespostaCriacaoPedido {
+  status: 'pedido_registrado'
+  mensagem: string
+  pedido: Pedido
+}
+
+export interface RespostaHistoricoPedidos {
+  retencao_dias: 365
+  total: number
+  pedidos: Pedido[]
+}

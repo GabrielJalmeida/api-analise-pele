@@ -25,6 +25,7 @@ import type {
 
 import {
   enviarImagemProduto,
+  removerImagemProduto,
 } from '../services/api'
 
 
@@ -124,7 +125,11 @@ function ProductForm({
       form.resetFields()
 
       form.setFieldsValue({
-        marca: 'Lumina Skin',
+        marca: '',
+        descricao_curta: '',
+        conteudo: '',
+        ativos_principais: '',
+        estoque: 0,
         pele_sensivel: false,
         indicado_para_espinha: false,
         ativo: true,
@@ -177,18 +182,9 @@ function ProductForm({
   ) {
     setErroImagem(null)
 
-    if (
-      !produtoInicial
-      && !arquivoImagem
-    ) {
-      setErroImagem(
-        'Selecione uma imagem para o produto.',
-      )
-
-      return
-    }
-
     setProcessandoImagem(true)
+
+    let imagemNova: string | null = null
 
     try {
       let imagemUrl =
@@ -204,6 +200,7 @@ function ProductForm({
 
         imagemUrl =
           resultado.imagem_url
+        imagemNova = imagemUrl
       }
 
       await onSubmit({
@@ -211,6 +208,12 @@ function ProductForm({
         imagem_url: imagemUrl,
       })
     } catch (erro) {
+      if (imagemNova) {
+        await removerImagemProduto(
+          imagemNova,
+        ).catch(() => undefined)
+      }
+
       if (erro instanceof Error) {
         setErroImagem(
           erro.message,
@@ -232,7 +235,11 @@ function ProductForm({
       layout="vertical"
       onFinish={enviarFormulario}
       initialValues={{
-        marca: 'Lumina Skin',
+        marca: '',
+        descricao_curta: '',
+        conteudo: '',
+        ativos_principais: '',
+        estoque: 0,
         pele_sensivel: false,
         indicado_para_espinha: false,
         ativo: true,
@@ -242,7 +249,7 @@ function ProductForm({
         Imagem e identidade
       </Divider>
 
-      <Form.Item label="Imagem do produto">
+      <Form.Item label="Imagem do produto (opcional)">
         <div
           style={{
             border:
@@ -287,7 +294,7 @@ function ProductForm({
                 textAlign: 'center',
               }}
             >
-              Nenhuma imagem selecionada.
+              Sem imagem. O site exibirá uma composição visual neutra.
             </div>
           )}
 
@@ -434,14 +441,9 @@ function ProductForm({
           sm={12}
         >
           <Form.Item
-            label="Marca"
+            label="Marca (opcional)"
             name="marca"
             rules={[
-              {
-                required: true,
-                message:
-                  'Informe a marca.',
-              },
               {
                 min: 2,
                 message:
@@ -464,14 +466,9 @@ function ProductForm({
       </Row>
 
       <Form.Item
-        label="Descrição curta"
+        label="Descrição curta (opcional)"
         name="descricao_curta"
         rules={[
-          {
-            required: true,
-            message:
-              'Informe uma descrição.',
-          },
           {
             min: 10,
             message:
@@ -501,14 +498,9 @@ function ProductForm({
           sm={12}
         >
           <Form.Item
-            label="Conteúdo"
+            label="Conteúdo / volume (opcional)"
             name="conteudo"
             rules={[
-              {
-                required: true,
-                message:
-                  'Informe o conteúdo.',
-              },
               {
                 max: 30,
                 message:
@@ -529,14 +521,9 @@ function ProductForm({
           sm={12}
         >
           <Form.Item
-            label="Ativos principais"
+            label="Ativos principais (opcional)"
             name="ativos_principais"
             rules={[
-              {
-                required: true,
-                message:
-                  'Informe os principais ativos.',
-              },
               {
                 max: 200,
                 message:
@@ -596,13 +583,7 @@ function ProductForm({
           <Form.Item
             label="Estoque"
             name="estoque"
-            rules={[
-              {
-                required: true,
-                message:
-                  'Informe o estoque do produto.',
-              },
-            ]}
+            extra="Se não souber agora, deixe 0. O item não será recomendado até possuir estoque."
           >
             <InputNumber
               min={0}

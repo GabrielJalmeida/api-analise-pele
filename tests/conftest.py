@@ -14,6 +14,26 @@ from criar_banco import criar_tabelas
 from main import app
 
 
+@pytest.fixture(autouse=True)
+def isolar_credenciais_ia(
+    monkeypatch,
+):
+    monkeypatch.setenv(
+        "AI_PROVIDER",
+        "gemini",
+    )
+
+    for nome_chave in (
+        "GEMINI_API_KEY",
+        "OPENAI_API_KEY",
+        "ANTHROPIC_API_KEY",
+    ):
+        monkeypatch.delenv(
+            nome_chave,
+            raising=False,
+        )
+
+
 @pytest.fixture
 def banco_temporario(tmp_path, monkeypatch):
     caminho_banco = tmp_path / "produtos_teste.db"

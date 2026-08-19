@@ -1,105 +1,55 @@
-# Skin Admin
+# Skin Admin — Versão X
 
-Painel administrativo do Sistema de Análise de Pele e Recomendação de Cosméticos.
+Painel administrativo local do sistema de análise de pele. Ele gerencia o catálogo, imagens, importações, configurações de IA e registros demonstrativos usando a API FastAPI.
 
-Esta interface é responsável pelo gerenciamento do catálogo de produtos utilizado pela API.
+## Dois modos de uso
 
-## Tecnologias
+- **Desenvolvimento:** React/Vite no navegador, apontando para uma API já iniciada.
+- **Aplicativo Windows:** Tauri abre o painel em uma janela própria e inicia a API local empacotada como sidecar. Banco, mídias e configuração pertencem àquela instalação.
 
-- React
-- TypeScript
-- Vite
-- Ant Design
-- ESLint
+O aplicativo instalado não altera a demonstração hospedada. Na primeira abertura, o banco local começa vazio.
 
 ## Funcionalidades
 
-O painel permite:
-
-- cadastrar produtos;
-- editar produtos;
-- pesquisar produtos por nome;
-- filtrar por categoria;
-- filtrar por tipo de pele;
-- visualizar produtos ativos e inativos;
-- desativar produtos;
-- reativar produtos;
-- acompanhar preço e estoque.
-
-A desativação utiliza soft delete. O produto continua registrado no banco de dados, mas deixa de participar das recomendações enquanto estiver inativo.
-
-## Comunicação com a API
-
-O painel não acessa o banco SQLite diretamente.
-
-O fluxo é:
-
-```text
-React
-  ↓ HTTP/JSON
-FastAPI
-  ↓
-SQLite
-```
-
-O endereço da API é configurado através da variável:
-
-```env
-VITE_API_URL=http://127.0.0.1:8000
-```
-
-## Configuração
-
-Instale as dependências:
-
-```powershell
-npm install
-```
-
-Crie o arquivo local de ambiente:
-
-```powershell
-copy .env.example .env
-```
-
-O arquivo `.env.example` possui a configuração padrão:
-
-```env
-VITE_API_URL=http://127.0.0.1:8000
-```
-
-O `.env` local não deve ser enviado para o GitHub.
+- cadastro, edição, busca, ativação e desativação de produtos;
+- apenas nome, preço, categoria e tipo de pele são obrigatórios;
+- upload e substituição de imagens processadas pelo backend;
+- importação com prévia por CSV/XLSX, até 1.000 itens;
+- organização de texto desestruturado com IA, até 100 itens;
+- política explícita para ignorar ou atualizar nomes duplicados;
+- consulta de pedidos demonstrativos retidos por até 365 dias;
+- configuração local de Gemini, OpenAI ou Claude;
+- opção de reduzir estoque ao registrar uma seleção, desativada por padrão.
 
 ## Desenvolvimento
 
-Com a API FastAPI em execução, inicie o painel:
+Com a API em `http://127.0.0.1:8000`:
 
-```powershell
+```cmd
+npm install
+copy .env.example .env
 npm run dev
 ```
 
-Por padrão:
+Para validar:
 
-```text
-http://localhost:5173
-```
-
-## Validação
-
-Executar o lint:
-
-```powershell
+```cmd
 npm run lint
-```
-
-Gerar o build de produção:
-
-```powershell
 npm run build
 ```
 
+## Aplicativo Windows
+
+Na raiz do repositório, execute:
+
+```cmd
+build_windows.bat
+```
+
+O processo testa e empacota a API com PyInstaller, compila o painel e gera um instalador NSIS com Tauri 2. Consulte [`../docs/GUIA_DESKTOP.md`](../docs/GUIA_DESKTOP.md).
+
 ## Segurança
 
-O painel administrativo foi desenvolvido inicialmente para utilização controlada durante o desenvolvimento do projeto.
+As operações administrativas são bloqueadas quando `APP_ENV=production`. O modo desktop usa uma API restrita a `127.0.0.1` e armazena a chave de IA localmente sem devolvê-la pela interface.
 
-Antes da exposição pública das operações administrativas, deverá ser implementado um mecanismo de autenticação e autorização.
+Isso não equivale a autenticação para um painel web. Quem decidir publicar este painel deve implementar identidade, autorização, proteção contra abuso e auditoria.
