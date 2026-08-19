@@ -59,7 +59,7 @@ O repositório reúne quatro partes:
 
 O projeto possui três tutoriais completos em HTML, CSS e JavaScript. Eles funcionam offline, são responsivos e incluem ilustrações, comandos copiáveis, checklists, impressão em PDF e solução de erros comuns.
 
-### [Baixar o pacote com os três tutoriais](docs/Tutoriais-API-Analise-de-Pele.zip)
+### [Baixar o pacote com os três tutoriais](docs/Tutoriais-API-Analise-de-Pele)
 
 Depois de baixar:
 
